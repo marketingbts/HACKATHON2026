@@ -214,11 +214,9 @@ export interface BuildQuickPromptParams extends BusinessContext {
 
 export interface BuildPlanPromptParams extends BusinessContext {
   objective: string
-  audienceName?: string
-  tone: string
-  periodStart: string
-  periodEnd: string
-  detail?: string
+  audienceName: string
+  tone: string,
+  period: string
 }
 
 // ─── Zustand stores ───────────────────────────────────────────────────────────
