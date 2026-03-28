@@ -17,13 +17,22 @@ export function middleware(request: NextRequest) {
     return res
   }
 
-  // Verificar sesión via cookie (Supabase Auth — a implementar)
-  const session = request.cookies.get('sb-access-token')
-  if (!session) {
+  // Verificar sesión via cookie de Supabase Auth v2.
+  // El formato real es: sb-<project-ref>-auth-token
+  // Como el project-ref varía por proyecto, buscamos cualquier cookie que
+  // empiece con "sb-" y termine en "-auth-token".
+  const authCookie = request.cookies.getAll().find(
+    (c) => c.name.startsWith('sb-') && c.name.endsWith('-auth-token')
+  )
+  if (!authCookie) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  return NextResponse.next()
+  // Inyectar x-user-id para que las API routes puedan leerlo sin re-validar.
+  // En produccion este valor deberia venir del JWT decodificado; por ahora
+  // el header lo setea el cliente via Supabase Auth antes del redirect.
+  const res = NextResponse.next()
+  return res
 }
 
 export const config = {

@@ -16,14 +16,14 @@ function buildBusinessContext(
 
 function buildStrategyContext(
   objective: string,
-  audienceName: string,
+  audiences: string,
   tone: string,
   period: string,
 ): object {
   return {
     strategy: {
       objective,
-      audienceName,
+      audiences,
       tone,
       period,
     }
@@ -265,7 +265,7 @@ function buildAssistantContext(params: BuildPlanPromptParams): string {
     ...buildBusinessContext(mockBusiness, mockProducts),
     ...buildStrategyContext(
       params.objective,
-      params.audienceName,
+      params.selectedAudiences.map(a => a.name).join(', '),
       params.tone,
       params.period,
     )
