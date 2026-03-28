@@ -1,4 +1,5 @@
 // ─── Entidades de dominio ─────────────────────────────────────────────────────
+// camelCase — lo que el frontend consume en requests y responses
 
 export interface Business {
   id: string
@@ -11,7 +12,7 @@ export interface Business {
   typography: string | null
   socialNetworks: string[]
   createdAt: string
-  updatedAt: string
+  updatedAt: string | null
 }
 
 export interface Audience {
@@ -39,25 +40,24 @@ export interface Product {
 export interface ContentPlan {
   id: string
   businessId: string
-  audienceId: string | null
-  objective: string
-  tone: string
-  periodStart: string
-  periodEnd: string
+  objective: string | null
+  tone: string | null
+  periodStart: string | null
+  periodEnd: string | null
   status: 'active' | 'archived'
   strategySummary: string | null
   recommendedActions: string[]
   createdAt: string
-  updatedAt: string
+  updatedAt: string | null
 }
 
 export interface ContentPost {
   id: string
   planId: string
-  scheduledDate: string
-  network: string
-  format: string
-  copy: string
+  scheduledDate: string | null
+  network: string | null
+  format: string | null
+  copy: string | null
   imageSuggestion: string | null
   createdAt: string
 }
@@ -65,16 +65,17 @@ export interface ContentPost {
 export interface QuickGeneration {
   id: string
   businessId: string
-  format: string
+  format: string | null
   productId: string | null
   audienceName: string | null
   detail: string | null
-  copy: string
+  copy: string | null
   imageSuggestion: string | null
   createdAt: string
 }
 
-// ─── API Requests ─────────────────────────────────────────────────────────────
+// ─── API Requests (Frontend → Backend) ───────────────────────────────────────
+// camelCase en el body del fetch
 
 export interface CreateBusinessRequest {
   name: string
@@ -108,6 +109,27 @@ export interface CreateProductRequest {
 
 export type UpdateProductRequest = Partial<CreateProductRequest>
 
+export interface CreateContentPlanRequest {
+  objective: string
+  audienceIds: string[]
+  productIds: string[]
+  tone: string
+  periodStart: string   // YYYY-MM-DD
+  periodEnd: string     // YYYY-MM-DD
+  detail?: string
+}
+
+export interface SaveContentPlanRequest {
+  planId: string
+  posts: Array<{
+    scheduledDate: string
+    network: string
+    format: string
+    copy: string
+    imageSuggestion?: string
+  }>
+}
+
 export interface GenerateQuickRequest {
   format: 'post' | 'reel' | 'carrusel' | 'historia'
   productId?: string
@@ -124,27 +146,7 @@ export interface SaveQuickGenerationRequest {
   imageSuggestion?: string
 }
 
-export interface CreateContentPlanRequest {
-  objective: string
-  audienceId?: string
-  tone: string
-  periodStart: string
-  periodEnd: string
-  detail?: string
-}
-
-export interface SaveContentPlanRequest {
-  planId: string
-  posts: Array<{
-    scheduledDate: string
-    network: string
-    format: string
-    copy: string
-    imageSuggestion?: string
-  }>
-}
-
-// ─── API Responses ────────────────────────────────────────────────────────────
+// ─── API Responses (Backend → Frontend) ──────────────────────────────────────
 
 export interface BusinessResponse extends Business {
   audiences: Audience[]
@@ -153,17 +155,18 @@ export interface BusinessResponse extends Business {
 
 export interface ContentPlanResponse extends ContentPlan {
   posts: ContentPost[]
-  audience: Audience | null
+  audiences: Audience[]
+  products: Product[]
 }
 
 export interface CalendarEntry {
-  date: string
+  date: string | null
   planId: string
-  planObjective: string
+  planObjective: string | null
   postId: string
-  network: string
-  format: string
-  copy: string
+  network: string | null
+  format: string | null
+  copy: string | null
   imageSuggestion: string | null
 }
 
@@ -214,7 +217,8 @@ export interface BuildQuickPromptParams extends BusinessContext {
 
 export interface BuildPlanPromptParams extends BusinessContext {
   objective: string
-  audienceName?: string
+  selectedAudiences: Audience[]
+  selectedProducts: Product[]
   tone: string
   periodStart: string
   periodEnd: string

@@ -4,12 +4,12 @@ export interface Session {
   userId: string
 }
 
-// ─── Para Server Components y Server Actions ──────────────────────────────────
-// Usa `next/headers` para leer el header x-user-id inyectado por el middleware.
+const DEV_USER_ID = process.env.DEV_USER_ID ?? '00000000-0000-0000-0000-000000000001'
 
+// ─── Para Server Components y Server Actions ──────────────────────────────────
 export async function getSession(): Promise<Session | null> {
   if (process.env.SKIP_AUTH === 'true') {
-    return { userId: 'dev-user-id' }
+    return { userId: DEV_USER_ID }
   }
 
   const headersList = headers()
@@ -20,27 +20,15 @@ export async function getSession(): Promise<Session | null> {
 }
 
 // ─── Para API Routes (Route Handlers) ────────────────────────────────────────
-// Recibe el objeto Request nativo de la API route y extrae el userId
-// del header que el middleware inyecta en cada request autenticado.
-//
-// Uso en una API route:
-//   const userId = getUserIdFromRequest(request)
-//   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
 export function getUserIdFromRequest(request: Request): string | null {
   if (process.env.SKIP_AUTH === 'true') {
-    return 'dev-user-id'
+    return DEV_USER_ID
   }
 
   return request.headers.get('x-user-id')
 }
 
 // ─── Helper para API routes que requieren autenticacion obligatoria ───────────
-// Lanza un error tipado si no hay sesion; simplifica el boilerplate en las routes.
-//
-// Uso:
-//   const userId = requireUserId(request)  // lanza ApiAuthError si no hay sesion
-
 export class ApiAuthError extends Error {
   readonly statusCode = 401
   constructor() {
