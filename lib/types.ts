@@ -114,8 +114,7 @@ export interface CreateContentPlanRequest {
   audienceIds: string[]
   productIds: string[]
   tone: string
-  periodStart: string   // YYYY-MM-DD
-  periodEnd: string     // YYYY-MM-DD
+  period: 'day' | 'week' | 'month'
   detail?: string
 }
 
@@ -220,8 +219,7 @@ export interface BuildPlanPromptParams extends BusinessContext {
   selectedAudiences: Audience[]
   selectedProducts: Product[]
   tone: string
-  periodStart: string
-  periodEnd: string
+  period: 'day' | 'week' | 'month'
   detail?: string
 }
 
