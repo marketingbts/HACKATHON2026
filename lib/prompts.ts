@@ -239,37 +239,108 @@ function buildAssistantContext(params: BuildPlanPromptParams): string {
   })
 }
 
-export function buildQuickPrompt(params: BuildQuickPromptParams): string {
-  const context = buildBusinessContext(params.business, params.products)
-
+function buildQuickSystemContent(): string {
   return `
-Eres un experto en marketing de contenidos para redes sociales en Latinoamérica.
-Trabajás con emprendedores y pymes. Tu tono es práctico y orientado a resultados.
+Sos un experto en marketing digital para emprendedores y pymes de Argentina.
+Tu tarea es generar 3 variantes de copy para una publicación en redes sociales.
 
-${JSON.stringify(context, null, 2)}
+REGLAS GENERALES:
+- Escribí TODO en español rioplatense, simple y accionable
+- Cada variante debe tener un enfoque distinto: emocional, racional y urgencia
+- Copy listo para publicar, sin necesidad de edición
+- Incluí hashtags relevantes al final de cada variante
+- NO agregues texto fuera del JSON
+- RESPONDÉ ÚNICAMENTE EN JSON VÁLIDO
 
-## Tarea
-Generá 3 variantes de copy para un post en redes sociales:
-- Formato: ${params.format}
-${params.productName ? `- Producto a destacar: ${params.productName}` : ''}
-${params.audienceName ? `- Audiencia objetivo: ${params.audienceName}` : ''}
-${params.detail ? `- Instrucción adicional: ${params.detail}` : ''}
+---
 
-## Reglas
-- Cada variante debe tener un enfoque distinto (emocional, racional, urgencia)
-- Incluí hashtags relevantes en cada variante
-- Copy listo para publicar, en español rioplatense
-- La sugerencia de imagen debe ser descriptiva (1-2 oraciones)
+## REGLAS POR FORMATO
 
-## Respuesta (JSON estricto)
-{
-  "variants": [
-    { "variant": 1, "copy": "...", "imageSuggestion": "..." },
-    { "variant": 2, "copy": "...", "imageSuggestion": "..." },
-    { "variant": 3, "copy": "...", "imageSuggestion": "..." }
-  ]
-}
+### post (imagen estática)
+- Hook fuerte en la primera línea (antes del "ver más")
+- CTA claro al final: comentá, guardá, compartí o etiquetá a alguien
+- Entre 150 y 300 palabras
+
+### reel
+- El copy funciona como guión de apertura o texto en pantalla
+- Las primeras palabras tienen que enganchar en 1–2 segundos
+- Estructura: hook → desarrollo breve → CTA
+- Describí visuales dinámicos con movimiento
+
+### carousel
+- Copy principal invita a "deslizar →"
+- Describí cada slide con UN mensaje claro
+- Última slide siempre con CTA
+- Máximo 10 slides
+
+### story
+- Copy corto y directo
+- Sugerí funciones interactivas: encuesta, pregunta, cuenta regresiva
+- Tono cercano y auténtico
+
+---
+
+## FÓRMULAS DE HOOK
+
+Variá el hook entre las 3 variantes:
+
+- Curiosidad: "Lo que nadie te cuenta sobre [tema]..." / "La razón real por la que [resultado]..."
+- Historia: "La semana pasada pasó algo inesperado..." / "Hace [tiempo], [estado]. Hoy, [estado]."
+- Valor directo: "Cómo [resultado] sin [dolor]:" / "[N] cosas que [resultado]:"
+- Contraria: "Opinión poco popular: [afirmación]" / "[Consejo común] está mal. Acá te explico por qué:"
+
+Recordá: SOLO JSON válido.
   `.trim()
+}
+
+function buildQuickUserContent(params: BuildQuickPromptParams): string {
+  return JSON.stringify({
+    ...buildBusinessContext(params.business, params.products),
+    task: {
+      format: params.format,
+      ...(params.productName  && { product:  params.productName }),
+      ...(params.audienceName && { audience: params.audienceName }),
+      ...(params.detail       && { detail:   params.detail }),
+    },
+  })
+}
+
+export function buildQuickPrompt(params: BuildQuickPromptParams): object {
+  return {
+    temperature: 0.8,
+    top_p: 1,
+    max_completion_tokens: 2000,
+    response_format: {
+      type: 'json_schema',
+      json_schema: {
+        name: 'quick_generation',
+        schema: {
+          type: 'object',
+          required: ['variants'],
+          properties: {
+            variants: {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                type: 'object',
+                required: ['variant', 'copy', 'imageSuggestion'],
+                properties: {
+                  variant:         { type: 'integer', enum: [1, 2, 3] },
+                  copy:            { type: 'string' },
+                  imageSuggestion: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    messages: [
+      { role: 'system', content: buildQuickSystemContent() },
+      { role: 'user',   content: buildQuickUserContent(params) },
+    ],
+  }
 }
 
 export function buildPlanPrompt(params: BuildPlanPromptParams): object {
