@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+.next
+
+.env
+
+yarn.lock
+package-lock.json
+
+.claude
