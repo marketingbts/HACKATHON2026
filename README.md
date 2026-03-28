@@ -1,107 +1,73 @@
-# Marki — MVP Hackathon ITBA 2026
+# 🚀 Marki
 
-Plataforma web para que emprendedores y pymes generen estrategia de contenido para redes sociales con IA.
+**Generación de estrategia de contenido para redes, personalizada para tu negocio.**
 
-## Requisitos
+---
+## Ejecución del proyecto
 
-- Node.js 18+
-- npm
 
-## Instalación
 
-```bash
-npm install
-```
+## 📌 Resumen Ejecutivo
 
-## Variables de entorno
+**Marki** es una plataforma web 100% en español que permite a emprendedores y dueños de pymes crear estrategias contenido profesional para redes sociales con asistencia de inteligencia artificial, sin necesidad de conocimientos técnicos ni experiencia en marketing.
 
-Copiá el archivo de ejemplo y completá los valores:
+Está diseñada para resolver un problema concreto: la falta de tiempo, estrategia y claridad a la hora de comunicar un negocio en redes.
 
-```bash
-cp .env.local.example .env.local
-```
+---
 
-Para desarrollo, solo necesitás:
+## 🎯 ¿Para quién es?
 
-```bash
-SKIP_AUTH=true
-AI_PROVIDER=groq
-GROQ_API_KEY=gsk_...
-```
+**Marki** está pensado para:
 
-## Levantar en desarrollo
+- Emprendedores  
+- Dueños de pymes  
+- Negocios locales (panaderías, tiendas de ropa, servicios, etc.)
 
-```bash
-npm run dev
-```
+### 👤 Usuarios típicos
 
-La app queda disponible en [http://localhost:3000](http://localhost:3000).
+- No tienen equipo de marketing  
+- No saben qué publicar ni cómo  
+- Usan herramientas genéricas sin buenos resultados  
+- Hablan español y buscan simplicidad  
 
-Con `SKIP_AUTH=true`, no hace falta registrarse. La app carga directo con datos de demo ("La Esquina de María").
+---
 
-## Rutas disponibles
+## 😖 Problema
 
-| Ruta | Descripción |
-|---|---|
-| `/dashboard` | Pantalla principal |
-| `/onboarding` | Carga de datos del negocio (primera vez) |
-| `/generate` | Generación rápida de posts |
-| `/plans` | Lista de planes |
-| `/plans/new` | Crear nuevo plan de contenido |
-| `/plans/[id]` | Detalle de un plan |
-| `/calendar` | Calendario unificado de todos los planes activos |
-| `/settings` | Editar datos del negocio |
-| `/login` | Iniciar sesión |
-| `/registro` | Crear cuenta |
+Hoy, muchos emprendedores:
 
-## Endpoints de la API
+- No saben **qué publicar**  
+- No tienen claridad sobre **cuándo ni cómo hacerlo**  
+- Pierden tiempo usando herramientas que no entienden su negocio  
+- Publican de forma inconsistente o directamente abandonan redes  
 
-Todos los endpoints responden con mocks que respetan los contratos definidos en `lib/types.ts`.
+👉 El resultado: redes sociales que no generan valor.
 
-```
-GET    /api/business
-POST   /api/business
-PUT    /api/business
+---
 
-POST   /api/audiences
-PUT    /api/audiences/[id]
-DELETE /api/audiences/[id]
+## 💡 Solución
 
-POST   /api/products
-PUT    /api/products/[id]
-DELETE /api/products/[id]
+**Marki permite:**
 
-GET    /api/plans
-POST   /api/plans
-GET    /api/plans/[id]
-PATCH  /api/plans/[id]
+- Cargar el contexto del negocio **una sola vez**  
+- Generar contenido relevante y personalizado automáticamente  
+- Crear una estrategia de contenido coherente  
+- Organizar publicaciones en un calendario claro  
 
-POST   /api/generate/quick
-POST   /api/generate/plan
+Todo en un solo lugar, sin complejidad.
 
-GET    /api/quick-generations
-POST   /api/quick-generations
+---
 
-GET    /api/calendar
-```
+## ✨ Propuesta de Valor
 
-## Estructura del proyecto
+> **“Generación de estrategia de contenido para redes, personalizada para tu negocio.”**
 
-```
-app/
-  (auth)/         → login, registro
-  (app)/          → todas las pantallas autenticadas
-  api/            → endpoints backend
-lib/
-  types.ts        → interfaces TypeScript (contratos entre capas)
-  mock-data.ts    → datos de demo
-  auth.ts         → helper de sesión (soporta SKIP_AUTH)
-  ai.ts           → abstracción de proveedor IA (groq/openai/gemini)
-  prompts.ts      → construcción de prompts
-  supabase.ts     → cliente Supabase (placeholder)
-middleware.ts     → protección de rutas
-```
+---
 
-## Estado actual
+## 🔥 Diferenciadores
 
-Primera iteración — mocks estáticos. Los `TODO` en el código marcan los puntos de integración con Supabase y la IA real.
+- 🗣️ **100% en español** (lenguaje simple y accesible)  
+- 🧠 **Contexto del negocio persistente** (no prompts genéricos)  
+- 📅 **Estrategia + contenido + calendario integrados**  
+- 🧑‍💼 **Enfocado en emprendedores y pymes**, no en grandes empresas  
+- ⚡ **Rápido y fácil de usar**, incluso para usuarios sin experiencia digital  
