@@ -13,6 +13,16 @@ const OBJECTIVES = [
 ]
 
 const TONES = ['Formal', 'Informal', 'Cercano', 'Profesional']
+const PERIODS = ['daily', 'weekly', 'monthly']
+const PRODUCTS_MOCK = [
+      "Viandas semanales",
+      "Plan mensual",
+      "Plan vegetariano",
+      "Envío a domicilio"
+    ]
+const AUDIENCE_MOCK = [
+  "Mamás del barrio"
+]
 
 export default function NewPlanPage() {
   const router = useRouter()
@@ -22,10 +32,10 @@ export default function NewPlanPage() {
   const [saved, setSaved] = useState(false)
 
   const [objective, setObjective] = useState(OBJECTIVES[0])
+  const [product, setProduct] = useState(PRODUCTS_MOCK[1])
+  const [audience, setAudience] = useState("Mamás del barrio")
   const [tone, setTone] = useState(TONES[2])
-  const [periodStart, setPeriodStart] = useState('2026-04-01')
-  const [periodEnd, setPeriodEnd] = useState('2026-04-07')
-  const [detail, setDetail] = useState('')
+  const [frequency, setFrequency] = useState(PERIODS[1])
 
   async function handleGenerate() {
     setLoading(true)
@@ -34,7 +44,7 @@ export default function NewPlanPage() {
     const res = await fetch('/api/generate/plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ objective, tone, periodStart, periodEnd, detail }),
+      body: JSON.stringify({ objective, tone, product, audience, frequency }),
     })
     const data: GeneratePlanResponse = await res.json()
     setResult(data)
@@ -84,9 +94,29 @@ export default function NewPlanPage() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium mb-1">Producto</label>
+            <select 
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={product}
+              onChange={(e) => setProduct(e.target.value)}
+            >
+              {PRODUCTS_MOCK.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+              <option>+ Agregar nueva</option>
+            </select>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium mb-1">Audiencia</label>
-            <select className="w-full border rounded px-3 py-2 text-sm">
-              <option>Mamás del barrio</option>
+            <select 
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={audience}
+              onChange={(e) => setAudience(e.target.value)}
+            >
+              {AUDIENCE_MOCK.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
               <option>+ Agregar nueva</option>
             </select>
           </div>
@@ -108,38 +138,21 @@ export default function NewPlanPage() {
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Desde</label>
-              <input
-                type="date"
-                className="w-full border rounded px-3 py-2 text-sm"
-                value={periodStart}
-                onChange={(e) => setPeriodStart(e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Hasta</label>
-              <input
-                type="date"
-                className="w-full border rounded px-3 py-2 text-sm"
-                value={periodEnd}
-                onChange={(e) => setPeriodEnd(e.target.value)}
-              />
-            </div>
-          </div>
-
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Detalles adicionales <span className="text-gray-400 font-normal">(opcional)</span>
-            </label>
-            <textarea
-              className="w-full border rounded px-3 py-2 text-sm"
-              rows={2}
-              placeholder="Ej: estamos lanzando nuestro pan de masa madre por primera vez"
-              value={detail}
-              onChange={(e) => setDetail(e.target.value)}
-            />
+            <label className="block text-sm font-medium mb-2">Período</label>
+            <div className="flex gap-2 flex-wrap">
+              {PERIODS.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setFrequency(t)}
+                  className={`px-4 py-1.5 rounded-full text-sm border ${
+                    frequency === t ? 'bg-black text-white border-black' : 'border-gray-300'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
 
           <button
