@@ -69,13 +69,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: planError?.message ?? 'Error al crear el plan' }, { status: 500 })
   }
 
-  const insertPromises: Promise<unknown>[] = []
+  const insertPromises = []
 
   if (audienceIds?.length) {
     insertPromises.push(
       supabase.from('content_plan_audiences').insert(
         audienceIds.map((id: string) => ({ plan_id: plan.id, audience_id: id }))
-      )
+      ).then()
     )
   }
 
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     insertPromises.push(
       supabase.from('content_plan_products').insert(
         productIds.map((id: string) => ({ plan_id: plan.id, product_id: id }))
-      )
+      ).then()
     )
   }
 
