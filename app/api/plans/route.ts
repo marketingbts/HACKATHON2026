@@ -38,11 +38,21 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const body = await req.json()
-  const { objective, tone, periodStart, periodEnd, audienceIds, productIds } = body
+  const { objective, tone, period, audienceIds, productIds } = body
 
-  if (!objective || !tone || !periodStart || !periodEnd) {
+  if (!objective || !tone || !period) {
     return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
   }
+
+  const periodDays: Record<string, number> = { day: 1, week: 7, month: 30 }
+  if (!periodDays[period]) {
+    return NextResponse.json({ error: 'period debe ser day, week o month' }, { status: 400 })
+  }
+
+  const periodStart = new Date().toISOString().split('T')[0]
+  const end = new Date()
+  end.setDate(end.getDate() + periodDays[period])
+  const periodEnd = end.toISOString().split('T')[0]
 
   const { data: business } = await supabase
     .from('businesses')
