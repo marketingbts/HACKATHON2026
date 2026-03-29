@@ -11,9 +11,11 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import { HeroCard } from './components/HeroCard'
 import { QuickAction } from '@/components/ui/QuickAction'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { PostsTable } from './components/PostsTable'
+import { CalendarList, CalendarRow } from '@/components/ui/CalendarRow'
+import { MonthCalendar } from './components/MonthCalendar'
+import { ContentDetailModal } from '@/components/ui/ContentDetailModal'
 import { cn } from '@/lib/utils'
-import { useBusiness, useCalendar, mapCalendarResponseToUpcomingPosts } from '@/lib/services/dashboard'
+import { useBusiness, useCalendar, mapCalendarResponseToUpcomingPosts, type UpcomingPostFromAPI } from '@/lib/services/dashboard'
 
 type PostsTab = 'list' | 'calendar'
 
@@ -30,6 +32,8 @@ function SectionDivider({ title }: { title: string }) {
 export default function DashboardPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<PostsTab>('list')
+  const [selectedPost, setSelectedPost] = useState<UpcomingPostFromAPI | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: businessData, error: businessError, isLoading: loadingBusiness } = useBusiness()
   const { data: calendarData, isLoading: loadingCalendar } = useCalendar()
@@ -52,6 +56,11 @@ export default function DashboardPage() {
   const hasPosts = upcomingPosts.length > 0
 
   const brandName = businessData?.name ?? 'Tu Negocio'
+
+  const handleSelectPost = (post: UpcomingPostFromAPI) => {
+    setSelectedPost(post)
+    setIsModalOpen(true)
+  }
 
   return (
     <div className="flex flex-col gap-10">
@@ -165,9 +174,21 @@ export default function DashboardPage() {
               role="tabpanel"
               aria-labelledby="tab-list"
               hidden={activeTab !== 'list'}
-              className='p-4'
             >
-              <PostsTable posts={upcomingPosts} />
+              <CalendarList>
+                {upcomingPosts.map((post) => (
+                  <CalendarRow
+                    key={post.id}
+                    date={post.date}
+                    time={post.time ?? '11:00'}
+                    title={post.planName}
+                    contentType={post.type}
+                    socialNetwork={post.socialNetwork}
+                    source={post.source}
+                    onClick={() => handleSelectPost(post)}
+                  />
+                ))}
+              </CalendarList>
             </div>
 
             <div
@@ -176,19 +197,29 @@ export default function DashboardPage() {
               aria-labelledby="tab-calendar"
               hidden={activeTab !== 'calendar'}
             >
-              <div className="flex flex-col items-center justify-center py-24 gap-3">
-                <CalendarTodayOutlinedIcon
-                  className="text-neutral-ui-muted"
-                  sx={{ fontSize: 40 }}
-                />
-                <p className="text-sm text-neutral-ui-muted font-medium">
-                  Vista calendario — próximamente
-                </p>
-              </div>
+              <MonthCalendar 
+                posts={upcomingPosts} 
+                onSelectPost={handleSelectPost}
+              />
             </div>
           </div>
         )}
       </section>
+
+      {/* Modal de Detalle */}
+      <ContentDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        content={selectedPost ? {
+          image: "https://placehold.co/600x400",
+          imageAlt: "",
+          date: selectedPost.date,
+          title: selectedPost.source === 'plan' ? `Plan: ${selectedPost.planName}` : 'Generación Rápida',
+          description: (selectedPost.copy || '') + (selectedPost.imageSuggestion ? `\n\nSugerencia IA: ${selectedPost.imageSuggestion}` : ''),
+          socialNetwork: selectedPost.socialNetwork,
+          format: selectedPost.type
+        } : null}
+      />
     </div>
   )
 }

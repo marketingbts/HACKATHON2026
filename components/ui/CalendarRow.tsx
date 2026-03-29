@@ -10,12 +10,23 @@ type CalendarRowProps = {
   className?: string
 }
 
-export function CalendarRow({ date, time, title, contentType, socialNetwork, className }: CalendarRowProps) {
+export function CalendarRow({ 
+  date, 
+  time, 
+  title, 
+  contentType, 
+  socialNetwork, 
+  source,
+  onClick,
+  className 
+}: CalendarRowProps & { source?: 'plan' | 'quick', onClick?: () => void }) {
   return (
     <article
+      onClick={onClick}
       className={cn(
         'flex items-center w-full min-h-[64px] px-6 py-3 gap-6',
-        'bg-surface-white hover:bg-neutral-50 transition-colors cursor-default',
+        'bg-surface-white hover:bg-neutral-50 transition-colors',
+        onClick ? 'cursor-pointer' : 'cursor-default',
         className,
       )}
     >
@@ -30,9 +41,22 @@ export function CalendarRow({ date, time, title, contentType, socialNetwork, cla
       </div>
 
       {/* Título */}
-      <p className="flex-1 text-sm font-medium text-neutral-800 truncate m-0">
-        {title}
-      </p>
+      <div className="flex-1 min-w-0 flex items-center gap-3">
+        {source && (
+          <Badge 
+            label={source === 'plan' ? 'Plan' : 'Rápido'} 
+            className={cn(
+              "text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded",
+              source === 'plan' 
+                ? "bg-purple-100 text-purple-700 border border-purple-200" 
+                : "bg-blue-100 text-blue-700 border border-blue-200"
+            )}
+          />
+        )}
+        <p className="text-sm font-medium text-neutral-800 truncate m-0">
+          {title}
+        </p>
+      </div>
 
       {/* Badges container */}
       <div className="flex items-center gap-3 shrink-0">

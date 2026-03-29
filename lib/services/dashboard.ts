@@ -17,18 +17,21 @@ export interface BusinessResponse {
 }
 
 export interface CalendarEntry {
-  date: string // YYYY-MM-DD
-  planId: string
-  planObjective: string
+  date: string | null // YYYY-MM-DD
+  planId: string | null
+  planObjective: string | null
   postId: string
-  network: string
-  format: string
-  copy: string
+  network: string | null
+  format: string | null
+  copy: string | null
   imageSuggestion: string | null
+  source?: 'plan' | 'quick'
 }
 
 export interface CalendarResponse {
   entries: CalendarEntry[]
+  planEntries?: CalendarEntry[]
+  quickEntries?: CalendarEntry[]
 }
 
 export function useBusiness() {
@@ -62,11 +65,15 @@ export function useCalendar() {
 
 export type UpcomingPostFromAPI = {
   id: string
-  date: string
+  date: string // Formateada: "lunes, 30 mar"
+  isoDate: string // Original: "2026-03-30"
   time?: string
   planName: string
   type: PostType
   socialNetwork: SocialNetwork
+  copy?: string
+  imageSuggestion?: string
+  source?: 'plan' | 'quick'
 }
 
 /**
@@ -92,10 +99,14 @@ function formatLocalDay(isoDate: string) {
 export function mapCalendarResponseToUpcomingPosts(data: CalendarResponse): UpcomingPostFromAPI[] {
   return data.entries.map((entry) => ({
     id: entry.postId,
-    date: formatLocalDay(entry.date),
-    time: undefined, // El usuario requirió quitar la hora si no existe
-    planName: entry.planObjective,
-    type: (entry.format.charAt(0).toUpperCase() + entry.format.slice(1)) as PostType, // "reel" -> "Reel"
-    socialNetwork: (entry.network.charAt(0).toUpperCase() + entry.network.slice(1)) as SocialNetwork, // "instagram" -> "Instagram"
+    date: formatLocalDay(entry.date ?? ''),
+    isoDate: entry.date ?? '',
+    time: undefined,
+    planName: entry.planObjective ?? 'Sin título',
+    type: (entry.format ? entry.format.charAt(0).toUpperCase() + entry.format.slice(1) : 'Post') as PostType,
+    socialNetwork: (entry.network ? entry.network.charAt(0).toUpperCase() + entry.network.slice(1) : 'Instagram') as SocialNetwork,
+    copy: entry.copy ?? '',
+    imageSuggestion: entry.imageSuggestion ?? '',
+    source: entry.source
   }))
 }
