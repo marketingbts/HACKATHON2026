@@ -2,9 +2,9 @@
 
 import InstagramIcon from '@mui/icons-material/Instagram'
 import FacebookIcon from '@mui/icons-material/Facebook'
+import WhatsAppIcon from '@mui/icons-material/WhatsApp'
 import { cn } from '@/lib/utils'
-
-type SocialNetwork = 'Instagram' | 'Facebook' | 'TikTok'
+import type { SocialNetwork } from '@/lib/services/dashboard'
 
 type SocialBadgeProps = {
   network: SocialNetwork
@@ -51,7 +51,13 @@ const SOCIAL_CONFIG: Record<
     icon: <TikTokIcon size={14} />,
     label: 'TikTok',
     textColor: 'text-[#010101]',
-    bgColor: 'rgba(1,1,1,0.07)',
+    bgColor: 'rgba(1, 1, 1, 0.07)',
+  },
+  WhatsApp: {
+    icon: <WhatsAppIcon sx={{ fontSize: 14 }} />,
+    label: 'WhatsApp',
+    textColor: 'text-[#25D366]',
+    bgColor: 'rgba(37, 211, 102, 0.10)',
   },
 }
 

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import type { PostType, SocialNetwork } from '@/lib/mock/dashboard'
+export type SocialNetwork = 'Instagram' | 'Facebook' | 'TikTok' | 'WhatsApp'
+export type PostType = 'Historia' | 'Reel' | 'Post' | 'Carrusel'
 
 export interface BusinessResponse {
   id: string
