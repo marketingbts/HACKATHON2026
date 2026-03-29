@@ -6,6 +6,8 @@ import { Button } from './Button'
 import { useImageGeneration } from '@/lib/hooks/use-image-generation'
 
 type ContentCardProps = {
+  image?: string
+  imageAlt?: string
   copy?: string
   description?: string
   date: string
@@ -35,6 +37,8 @@ function RecommendedBadge() {
 }
 
 export function ContentCard({
+  image,
+  imageAlt,
   copy: _copy,
   description,
   date,
@@ -81,19 +85,22 @@ export function ContentCard({
     >
       {/* Imagen generada por HF */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
-        {loading && (
+        {(loading && !image) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-neutral-50">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-400 border-t-transparent" />
             <span className="text-[10px] text-neutral-400">Generando imagen…</span>
           </div>
         )}
 
-        {imageUrl && !loading && (
+        {(imageUrl || image) && (
           <>
             <img
-              src={imageUrl}
-              alt={description ?? title}
-              className="h-full w-full object-cover"
+              src={imageUrl || image}
+              alt={imageAlt || description || title}
+              className={cn(
+                "h-full w-full object-cover transition-opacity duration-300",
+                loading && imageUrl ? "opacity-50" : "opacity-100"
+              )}
             />
             <div className="absolute right-3 top-3 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
               <button
