@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { InputField } from '@/components/ui/InputField'
+import { Textarea } from '@/components/ui/Textarea'
+import { Button } from '@/components/ui/Button'
 
 export type ProductFormData = {
   name: string
@@ -67,24 +70,22 @@ export function StepProducts({
     </div>
   )
 
+  const spinner = (
+    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+    </svg>
+  )
+
   const finishButton = (
-    <button
+    <Button
       onClick={handleFinish}
       disabled={isSubmitting}
-      className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold rounded-xl py-3.5 text-sm flex items-center justify-center gap-2 transition-colors mt-2"
+      className="w-full mt-2"
+      iconLeft={isSubmitting ? spinner : undefined}
     >
-      {isSubmitting ? (
-        <>
-          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-          </svg>
-          Guardando...
-        </>
-      ) : (
-        'Empezar a crear contenido 🎉'
-      )}
-    </button>
+      {isSubmitting ? 'Guardando...' : 'Empezar a crear contenido 🎉'}
+    </Button>
   )
 
   if (mode === 'form') {
@@ -92,27 +93,24 @@ export function StepProducts({
       <div className="flex flex-col gap-5">
         {header}
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Producto y/o servicio</label>
-          <input
-            className={`w-full border rounded px-3 py-2 text-sm ${errors.name ? 'border-red-400' : ''}`}
-            placeholder="Ej: Clases de música personalizadas"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-        </div>
+        <InputField
+          id="product-name"
+          label="Producto y/o servicio"
+          placeholder="Ej: Clases de música personalizadas"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className={errors.name ? 'border-red-400' : ''}
+        />
+        {errors.name && <p className="text-red-500 text-xs -mt-3">{errors.name}</p>}
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">¿Qué problema les resolvés?</label>
-          <textarea
-            className="w-full border rounded px-3 py-2 text-sm resize-none"
-            rows={3}
-            placeholder="Ej: Ayudo a mis alumnos a tocar sus canciones favoritas"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-        </div>
+        <Textarea
+          id="product-description"
+          label="¿Qué problema les resolvés?"
+          placeholder="Ej: Ayudo a mis alumnos a tocar sus canciones favoritas"
+          rows={3}
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
 
         {products.length > 0 && (
           <button

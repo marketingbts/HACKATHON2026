@@ -12,7 +12,7 @@ const STEPS = ['Negocio', 'Audiencias', 'Productos']
 export function OnboardingWizard() {
   const router = useRouter()
   const [step, setStep] = useState(0)
-  const [business, setBusiness] = useState<BusinessFormData>({ name: '', industry: '', description: '' })
+  const [business, setBusiness] = useState<BusinessFormData>({ name: '', industry: '', description: '', socialNetworks: [] })
   const [businessErrors, setBusinessErrors] = useState<Record<string, string>>({})
   const [audiences, setAudiences] = useState<AudienceFormData[]>([])
   const [products, setProducts] = useState<ProductFormData[]>([])
@@ -48,7 +48,7 @@ export function OnboardingWizard() {
           name: business.name.trim(),
           industry: business.industry.trim(),
           description: business.description.trim(),
-          socialNetworks: [],
+          socialNetworks: business.socialNetworks,
         }),
       })
 

@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { InputField } from '@/components/ui/InputField'
+import { Textarea } from '@/components/ui/Textarea'
+import { Button } from '@/components/ui/Button'
 
 export type AudienceFormData = {
   name: string
@@ -48,47 +51,32 @@ export function StepAudiences({ audiences, onAddAudience, onRemoveAudience, onBa
       <div className="flex flex-col gap-5">
         {header}
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Audiencia principal</label>
-          <input
-            className={`w-full border rounded px-3 py-2 text-sm ${errors.name ? 'border-red-400' : ''}`}
-            placeholder="Ej: Madres de familia del barrio, 30-50 años"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-        </div>
+        <InputField
+          id="audience-name"
+          label="Audiencia principal"
+          placeholder="Ej: Madres de familia del barrio, 30-50 años"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className={errors.name ? 'border-red-400' : ''}
+        />
+        {errors.name && <p className="text-red-500 text-xs -mt-3">{errors.name}</p>}
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">¿Qué problema les resolvés?</label>
-          <textarea
-            className="w-full border rounded px-3 py-2 text-sm resize-none"
-            rows={3}
-            placeholder="Ej: Tienen poco tiempo y quieren desayunos ricos y caseros sin cocinar"
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-        </div>
+        <Textarea
+          id="audience-description"
+          label="¿Qué problema les resolvés?"
+          placeholder="Ej: Tienen poco tiempo y quieren desayunos ricos y caseros sin cocinar"
+          rows={3}
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
 
         <div className="flex items-center justify-between pt-2">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-sm text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-            </svg>
-            Atrás
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-6 py-3 text-sm flex items-center gap-2 transition-colors"
-          >
-            Continuar
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
+          <Button variant="link" onClick={onBack}>
+            ← Atrás
+          </Button>
+          <Button onClick={handleSave}>
+            Continuar →
+          </Button>
         </div>
       </div>
     )
@@ -135,24 +123,12 @@ export function StepAudiences({ audiences, onAddAudience, onRemoveAudience, onBa
       </div>
 
       <div className="flex items-center justify-between pt-2">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-sm text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-          </svg>
-          Atrás
-        </button>
-        <button
-          onClick={onNext}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-6 py-3 text-sm flex items-center gap-2 transition-colors"
-        >
-          Continuar
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </button>
+        <Button variant="link" onClick={onBack}>
+          ← Atrás
+        </Button>
+        <Button onClick={onNext}>
+          Continuar →
+        </Button>
       </div>
     </div>
   )
