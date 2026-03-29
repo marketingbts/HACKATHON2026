@@ -222,7 +222,10 @@ export function HeroCard({
           </span>
           <div className="flex items-center gap-2">
             {socialNetworks.map((key) => {
-              const { icon, label } = SOCIAL_ICONS[key]
+              const normalizedKey = key.toLowerCase() as SocialNetworkKey
+              const entry = SOCIAL_ICONS[normalizedKey]
+              if (!entry) return null
+              const { icon, label } = entry
               return (
                 <button
                   key={key}

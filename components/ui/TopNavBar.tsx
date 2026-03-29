@@ -1,27 +1,14 @@
+import Link from 'next/link'
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import { cn } from '@/lib/utils'
 
 type TopNavBarProps = {
   greeting: string
   initials: string
-  onSettings?: () => void
   className?: string
 }
 
-function SettingsIcon() {
-  return (
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-export function TopNavBar({ greeting, initials, onSettings, className }: TopNavBarProps) {
+export function TopNavBar({ greeting, initials, className }: TopNavBarProps) {
   return (
     <header
       className={cn(
@@ -38,14 +25,13 @@ export function TopNavBar({ greeting, initials, onSettings, className }: TopNavB
       </p>
 
       <div className="flex items-center gap-3">
-        <button
-          type="button"
+        <Link
+          href="/settings"
           aria-label="Ajustes"
-          onClick={onSettings}
           className="w-5 h-5 flex items-center justify-center text-neutral-600 transition-colors duration-150 hover:text-neutral-900"
         >
-          <SettingsIcon />
-        </button>
+          <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
+        </Link>
 
         <div
           aria-hidden="true"
