@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SideNavBar } from '@/components/ui/SideNavBar'
-import { TopNavBar } from '@/components/ui/TopNavBar'
 import { InputField } from '@/components/ui/InputField'
 import { Textarea } from '@/components/ui/Textarea'
 import { Button } from '@/components/ui/Button'
@@ -120,200 +118,187 @@ export default function SettingsPage() {
     )
   }
 
-  const brandName = data?.name ?? ''
-
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-background">
+      <div className="flex items-center justify-center py-24">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-surface-background">
-      <SideNavBar />
+    <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto">
 
-      <div className="flex-1 flex flex-col pl-60">
-        <TopNavBar
-          greeting="Configuración"
-          initials={brandName.substring(0, 2).toUpperCase() || '..'}
+      {/* ── Datos del negocio ── */}
+      <SectionCard title="Datos del negocio">
+        <InputField
+          id="settings-name"
+          label="Nombre del negocio"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <InputField
+          id="settings-industry"
+          label="Rubro"
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+        />
+        <Textarea
+          id="settings-description"
+          label="¿Qué hace especial a tu negocio?"
+          rows={3}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <BatchSelect
+          label="Redes sociales donde tenés presencia"
+          options={SOCIAL_NETS}
+          value={socialNetworks}
+          onChange={setSocialNetworks}
         />
 
-        <main className="flex flex-col gap-6 px-4 sm:px-6 lg:px-10 pt-[80px] pb-16 w-full max-w-2xl mx-auto">
+        {updateBusiness.error && (
+          <p className="text-red-500 text-xs">{updateBusiness.error.message}</p>
+        )}
 
-          {/* ── Datos del negocio ── */}
-          <SectionCard title="Datos del negocio">
-            <InputField
-              id="settings-name"
-              label="Nombre del negocio"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <InputField
-              id="settings-industry"
-              label="Rubro"
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
-            />
-            <Textarea
-              id="settings-description"
-              label="¿Qué hace especial a tu negocio?"
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <BatchSelect
-              label="Redes sociales donde tenés presencia"
-              options={SOCIAL_NETS}
-              value={socialNetworks}
-              onChange={setSocialNetworks}
-            />
+        <div className="flex justify-end pt-1">
+          <Button
+            onClick={() => updateBusiness.mutate({ name, industry, description, socialNetworks })}
+            disabled={updateBusiness.isPending}
+          >
+            {updateBusiness.isPending ? 'Guardando...' : updateBusiness.isSuccess ? 'Guardado ✓' : 'Guardar cambios'}
+          </Button>
+        </div>
+      </SectionCard>
 
-            {updateBusiness.error && (
-              <p className="text-red-500 text-xs">{updateBusiness.error.message}</p>
-            )}
-
-            <div className="flex justify-end pt-1">
-              <Button
-                onClick={() => updateBusiness.mutate({ name, industry, description, socialNetworks })}
-                disabled={updateBusiness.isPending}
+      {/* ── Audiencias ── */}
+      <SectionCard title="Audiencias">
+        <div className="flex flex-col gap-2">
+          {data?.audiences.map((a) => (
+            <div key={a.id} className="flex items-center gap-2">
+              <div className="flex-1 bg-indigo-50 rounded-xl px-4 py-3">
+                <p className="text-sm font-medium text-neutral-800">{a.name}</p>
+                {a.description && (
+                  <p className="text-xs text-neutral-500 mt-0.5">{a.description}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => deleteAudience.mutate(a.id)}
+                disabled={deleteAudience.isPending}
+                className="text-neutral-400 hover:text-red-400 transition-colors p-1"
+                aria-label={`Eliminar ${a.name}`}
               >
-                {updateBusiness.isPending ? 'Guardando...' : updateBusiness.isSuccess ? 'Guardado ✓' : 'Guardar cambios'}
+                <TrashIcon />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {showAudienceForm ? (
+          <div className="flex flex-col gap-3 border border-border-subtle rounded-xl p-4">
+            <InputField
+              id="new-audience-name"
+              label="Audiencia"
+              placeholder="Ej: Madres de familia del barrio, 30-50 años"
+              value={newAudienceName}
+              onChange={(e) => setNewAudienceName(e.target.value)}
+              className={audienceError ? 'border-red-400' : ''}
+            />
+            {audienceError && <p className="text-red-500 text-xs -mt-1">{audienceError}</p>}
+            <Textarea
+              id="new-audience-desc"
+              label="¿Qué problema les resolvés?"
+              placeholder="Ej: Tienen poco tiempo y quieren desayunos ricos"
+              rows={2}
+              value={newAudienceDesc}
+              onChange={(e) => setNewAudienceDesc(e.target.value)}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="secondary" onClick={() => { setShowAudienceForm(false); setAudienceError('') }}>
+                Cancelar
+              </Button>
+              <Button onClick={handleAddAudience} disabled={addAudience.isPending}>
+                {addAudience.isPending ? 'Guardando...' : 'Agregar'}
               </Button>
             </div>
-          </SectionCard>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowAudienceForm(true)}
+            className="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <PlusIcon />
+            Agregar audiencia
+          </button>
+        )}
+      </SectionCard>
 
-          {/* ── Audiencias ── */}
-          <SectionCard title="Audiencias">
-            <div className="flex flex-col gap-2">
-              {data?.audiences.map((a) => (
-                <div key={a.id} className="flex items-center gap-2">
-                  <div className="flex-1 bg-indigo-50 rounded-xl px-4 py-3">
-                    <p className="text-sm font-medium text-neutral-800">{a.name}</p>
-                    {a.description && (
-                      <p className="text-xs text-neutral-500 mt-0.5">{a.description}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => deleteAudience.mutate(a.id)}
-                    disabled={deleteAudience.isPending}
-                    className="text-neutral-400 hover:text-red-400 transition-colors p-1"
-                    aria-label={`Eliminar ${a.name}`}
-                  >
-                    <TrashIcon />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {showAudienceForm ? (
-              <div className="flex flex-col gap-3 border border-border-subtle rounded-xl p-4">
-                <InputField
-                  id="new-audience-name"
-                  label="Audiencia"
-                  placeholder="Ej: Madres de familia del barrio, 30-50 años"
-                  value={newAudienceName}
-                  onChange={(e) => setNewAudienceName(e.target.value)}
-                  className={audienceError ? 'border-red-400' : ''}
-                />
-                {audienceError && <p className="text-red-500 text-xs -mt-1">{audienceError}</p>}
-                <Textarea
-                  id="new-audience-desc"
-                  label="¿Qué problema les resolvés?"
-                  placeholder="Ej: Tienen poco tiempo y quieren desayunos ricos"
-                  rows={2}
-                  value={newAudienceDesc}
-                  onChange={(e) => setNewAudienceDesc(e.target.value)}
-                />
-                <div className="flex gap-2 justify-end">
-                  <Button variant="secondary" onClick={() => { setShowAudienceForm(false); setAudienceError('') }}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleAddAudience} disabled={addAudience.isPending}>
-                    {addAudience.isPending ? 'Guardando...' : 'Agregar'}
-                  </Button>
-                </div>
+      {/* ── Productos y servicios ── */}
+      <SectionCard title="Productos y servicios">
+        <div className="flex flex-col gap-2">
+          {data?.products.map((p) => (
+            <div key={p.id} className="flex items-center gap-2">
+              <div className="flex-1 bg-indigo-50 rounded-xl px-4 py-3">
+                <p className="text-sm font-medium text-neutral-800">{p.name}</p>
+                {p.description && (
+                  <p className="text-xs text-neutral-500 mt-0.5">{p.description}</p>
+                )}
               </div>
-            ) : (
               <button
                 type="button"
-                onClick={() => setShowAudienceForm(true)}
-                className="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                onClick={() => deleteProduct.mutate(p.id)}
+                disabled={deleteProduct.isPending}
+                className="text-neutral-400 hover:text-red-400 transition-colors p-1"
+                aria-label={`Eliminar ${p.name}`}
               >
-                <PlusIcon />
-                Agregar audiencia
+                <TrashIcon />
               </button>
-            )}
-          </SectionCard>
-
-          {/* ── Productos y servicios ── */}
-          <SectionCard title="Productos y servicios">
-            <div className="flex flex-col gap-2">
-              {data?.products.map((p) => (
-                <div key={p.id} className="flex items-center gap-2">
-                  <div className="flex-1 bg-indigo-50 rounded-xl px-4 py-3">
-                    <p className="text-sm font-medium text-neutral-800">{p.name}</p>
-                    {p.description && (
-                      <p className="text-xs text-neutral-500 mt-0.5">{p.description}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => deleteProduct.mutate(p.id)}
-                    disabled={deleteProduct.isPending}
-                    className="text-neutral-400 hover:text-red-400 transition-colors p-1"
-                    aria-label={`Eliminar ${p.name}`}
-                  >
-                    <TrashIcon />
-                  </button>
-                </div>
-              ))}
             </div>
+          ))}
+        </div>
 
-            {showProductForm ? (
-              <div className="flex flex-col gap-3 border border-border-subtle rounded-xl p-4">
-                <InputField
-                  id="new-product-name"
-                  label="Producto o servicio"
-                  placeholder="Ej: Clases de música personalizadas"
-                  value={newProductName}
-                  onChange={(e) => setNewProductName(e.target.value)}
-                  className={productError ? 'border-red-400' : ''}
-                />
-                {productError && <p className="text-red-500 text-xs -mt-1">{productError}</p>}
-                <Textarea
-                  id="new-product-desc"
-                  label="¿Qué problema resolvés?"
-                  placeholder="Ej: Ayudo a mis alumnos a tocar sus canciones favoritas"
-                  rows={2}
-                  value={newProductDesc}
-                  onChange={(e) => setNewProductDesc(e.target.value)}
-                />
-                <div className="flex gap-2 justify-end">
-                  <Button variant="secondary" onClick={() => { setShowProductForm(false); setProductError('') }}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleAddProduct} disabled={addProduct.isPending}>
-                    {addProduct.isPending ? 'Guardando...' : 'Agregar'}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowProductForm(true)}
-                className="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-              >
-                <PlusIcon />
-                Agregar producto o servicio
-              </button>
-            )}
-          </SectionCard>
+        {showProductForm ? (
+          <div className="flex flex-col gap-3 border border-border-subtle rounded-xl p-4">
+            <InputField
+              id="new-product-name"
+              label="Producto o servicio"
+              placeholder="Ej: Clases de música personalizadas"
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              className={productError ? 'border-red-400' : ''}
+            />
+            {productError && <p className="text-red-500 text-xs -mt-1">{productError}</p>}
+            <Textarea
+              id="new-product-desc"
+              label="¿Qué problema resolvés?"
+              placeholder="Ej: Ayudo a mis alumnos a tocar sus canciones favoritas"
+              rows={2}
+              value={newProductDesc}
+              onChange={(e) => setNewProductDesc(e.target.value)}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="secondary" onClick={() => { setShowProductForm(false); setProductError('') }}>
+                Cancelar
+              </Button>
+              <Button onClick={handleAddProduct} disabled={addProduct.isPending}>
+                {addProduct.isPending ? 'Guardando...' : 'Agregar'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowProductForm(true)}
+            className="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+          >
+            <PlusIcon />
+            Agregar producto o servicio
+          </button>
+        )}
+      </SectionCard>
 
-        </main>
-      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { headers, cookies } from 'next/headers'
+import { AppShell } from './components/AppShell'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieHeader = cookies().toString()
@@ -13,5 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (res.status === 401) redirect('/login')
   if (res.status === 404) redirect('/onboarding')
 
-  return <>{children}</>
+  const business = await res.json()
+
+  return <AppShell brandName={business.name}>{children}</AppShell>
 }

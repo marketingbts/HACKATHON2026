@@ -160,9 +160,11 @@ export default function NewPlanPage() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-bold text-neutral-950">Plan de contenido</h1>
-      <p className="text-sm text-neutral-500 mb-4">Revisa y edita cada detalle de tu plan antes de comenzar a trabajar</p>
+    <>
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-950">Plan de contenido</h1>
+        <p className="text-sm text-neutral-500 mt-1">Revisa y edita cada detalle de tu plan antes de comenzar a trabajar</p>
+      </div>
 
       <div className="bg-surface-white border border-border-subtle rounded-2xl p-6 flex flex-col gap-6">
 
@@ -451,6 +453,6 @@ export default function NewPlanPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

@@ -1,8 +1,7 @@
-import { NavItem } from './NavItem'
+'use client'
 
-type SideNavBarProps = {
-  activeItem?: 'dashboard' | 'fast-create' | 'content-plan' | 'my-plans'
-}
+import { usePathname } from 'next/navigation'
+import { NavItem } from './NavItem'
 
 function DashboardIcon() {
   return (
@@ -50,13 +49,15 @@ function ListIcon() {
 }
 
 const NAV_ITEMS = [
-  { id: 'dashboard',    label: 'Dashboard',          href: '/dashboard',      icon: <DashboardIcon /> },
-  { id: 'fast-create',  label: 'Generación Rápida',  href: '/generate',       icon: <BoltIcon /> },
-  { id: 'content-plan', label: 'Plan de Contenido',  href: '/plans',          icon: <CalendarIcon /> },
-  { id: 'my-plans',     label: 'Mis Planes',         href: '/calendar',       icon: <ListIcon /> },
+  { id: 'dashboard',    label: 'Dashboard',          href: '/dashboard',  icon: <DashboardIcon /> },
+  { id: 'fast-create',  label: 'Generación Rápida',  href: '/generate',   icon: <BoltIcon /> },
+  { id: 'content-plan', label: 'Plan de Contenido',  href: '/plans/new',  icon: <CalendarIcon /> },
+  { id: 'my-plans',     label: 'Mis Planes',         href: '/calendar',   icon: <ListIcon /> },
 ] as const
 
-export function SideNavBar({ activeItem }: SideNavBarProps) {
+export function SideNavBar() {
+  const pathname = usePathname()
+
   return (
     <aside className="fixed top-0 left-0 w-60 h-screen flex flex-col bg-surface-background border-r border-border-subtle z-40">
       {/* Logo */}
@@ -71,15 +72,21 @@ export function SideNavBar({ activeItem }: SideNavBarProps) {
 
       {/* Nav links */}
       <nav className="px-4 flex flex-col gap-2" aria-label="Navegación principal">
-        {NAV_ITEMS.map((item) => (
-          <NavItem
-            key={item.id}
-            href={item.href}
-            label={item.label}
-            icon={item.icon}
-            active={activeItem === item.id}
-          />
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const active =
+            item.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : pathname.startsWith(item.href)
+          return (
+            <NavItem
+              key={item.id}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              active={active}
+            />
+          )
+        })}
       </nav>
     </aside>
   )
