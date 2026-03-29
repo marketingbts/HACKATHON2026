@@ -165,102 +165,102 @@ export default function NewPlanPage() {
 
   return (
     <>
-      <div>
+      <div className='pb-8'>
         <h1 className="text-2xl font-bold text-neutral-950">Plan de contenido</h1>
         <p className="text-sm text-neutral-500 mt-1">Revisa y edita cada detalle de tu plan antes de comenzar a trabajar</p>
       </div>
 
       <div className="bg-surface-white border border-border-subtle rounded-2xl p-6 flex flex-col gap-6">
 
-          {/* Section header */}
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
-              <img src="/assets/icons/graph-purple.svg" />
-            </span>
-            <span className="font-bold text-base text-neutral-950">Configuración del Plan</span>
-          </div>
+        {/* Section header */}
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
+            <img src="/assets/icons/graph-purple.svg" />
+          </span>
+          <span className="font-bold text-base text-neutral-950">Configuración del Plan</span>
+        </div>
 
-          {/* Producto */}
-          <Multiselect
-            id="select-product"
-            label="¿Qué producto o servicio querés destacar?"
-            options={productOptions}
-            value={selectedProductIds}
-            onChange={setSelectedProductIds}
-            onCreateNew={(name) => {
-              setInitialProductName(name)
-              setIsProductModalOpen(true)
-            }}
-            placeholder="Selecciona tus productos y/o servicios"
-          />
+        {/* Producto */}
+        <Multiselect
+          id="select-product"
+          label="¿Qué producto o servicio querés destacar?"
+          options={productOptions}
+          value={selectedProductIds}
+          onChange={setSelectedProductIds}
+          onCreateNew={(name) => {
+            setInitialProductName(name)
+            setIsProductModalOpen(true)
+          }}
+          placeholder="Selecciona tus productos y/o servicios"
+        />
 
-          {/* Audiencia */}
-          <Multiselect
-            id="select-audience"
-            label="¿A quién le querés hablar?"
-            options={audienceOptions}
-            value={selectedAudienceIds}
-            onChange={setSelectedAudienceIds}
-            onCreateNew={(name) => {
-              setInitialAudienceName(name)
-              setIsAudienceModalOpen(true)
-            }}
-            placeholder="Selecciona tus audiencias"
-          />
+        {/* Audiencia */}
+        <Multiselect
+          id="select-audience"
+          label="¿A quién le querés hablar?"
+          options={audienceOptions}
+          value={selectedAudienceIds}
+          onChange={setSelectedAudienceIds}
+          onCreateNew={(name) => {
+            setInitialAudienceName(name)
+            setIsAudienceModalOpen(true)
+          }}
+          placeholder="Selecciona tus audiencias"
+        />
 
-          {/* Fechas + Tono */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Select
-                id="select-tone"
-                label="¿Cuánto querés que dure la estrategia?"
-                options={PERIOD_OPTIONS}
-                value={period}
-                onChange={setPeriod}
-                placeholder="Seleccioná la duración"
-              />
-            </div>
-
+        {/* Fechas + Tono */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
             <Select
               id="select-tone"
-              label="Personalidad del mensaje"
-              options={TONE_OPTIONS}
-              value={tone}
-              onChange={setTone}
-              placeholder="Selecciona un tono y voz"
+              label="¿Cuánto querés que dure la estrategia?"
+              options={PERIOD_OPTIONS}
+              value={period}
+              onChange={setPeriod}
+              placeholder="Seleccioná la duración"
             />
           </div>
 
-          {/* Objetivo */}
-          <div className="flex flex-col gap-3">
-            <label className="text-sm font-medium text-neutral-700">¿Qué querés lograr con este plan de contenido?</label>
-            <fieldset className="flex flex-col gap-3">
-              <legend className="sr-only">Objetivo del plan</legend>
-              {GOAL_OPTIONS.map((opt) => (
-                <GoalOption
-                  key={opt.value}
-                  name="objective"
-                  value={opt.value}
-                  title={opt.title}
-                  description={opt.description}
-                  icon={opt.icon}
-                  checked={objective === opt.value}
-                  onChange={setObjective}
-                />
-              ))}
-            </fieldset>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Button 
-              variant="primary" 
-              onClick={handleGenerate} 
-              disabled={generatePlan.isPending || selectedProductIds.length === 0 || selectedAudienceIds.length === 0}
-            >
-              {generatePlan.isPending ? 'Generando tu plan...' : '✦ Generar plan'}
-            </Button>
-          </div>
+          <Select
+            id="select-tone"
+            label="Personalidad del mensaje"
+            options={TONE_OPTIONS}
+            value={tone}
+            onChange={setTone}
+            placeholder="Selecciona un tono y voz"
+          />
         </div>
+
+        {/* Objetivo */}
+        <div className="flex flex-col gap-3">
+          <label className="text-sm font-medium text-neutral-700">¿Qué querés lograr con este plan de contenido?</label>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="sr-only">Objetivo del plan</legend>
+            {GOAL_OPTIONS.map((opt) => (
+              <GoalOption
+                key={opt.value}
+                name="objective"
+                value={opt.value}
+                title={opt.title}
+                description={opt.description}
+                icon={opt.icon}
+                checked={objective === opt.value}
+                onChange={setObjective}
+              />
+            ))}
+          </fieldset>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="primary"
+            onClick={handleGenerate}
+            disabled={generatePlan.isPending || selectedProductIds.length === 0 || selectedAudienceIds.length === 0}
+          >
+            {generatePlan.isPending ? 'Generando tu plan...' : '✦ Generar plan'}
+          </Button>
+        </div>
+      </div>
 
       <ProductModal
         isOpen={isProductModalOpen}
@@ -335,19 +335,16 @@ export default function NewPlanPage() {
                 return (
                   <div key={i} className="relative">
                     <ContentCard
-                      image="https://placehold.co/600x400"
-                      imageAlt=""
+                      copy={currentVariant.copy}
+                      description={currentVariant.imageSuggestion}
                       date={formatDate(post.scheduledDate)}
                       dateTime={`${post.scheduledDate}T${result.calendar.find((c) => c.date === post.scheduledDate)?.suggestedTime ?? '11:00'}`}
                       title={currentVariant.copy.split('\n')[0]}
-                      description={currentVariant.imageSuggestion}
                       socialNetwork="Instagram"
                       format={POST_TYPE_LABEL[post.format]}
                       recommended={i === 0}
                       onViewMore={() => {
                         setSelectedDetailContent({
-                          image: "https://placehold.co/600x400",
-                          imageAlt: "",
                           date: formatDate(post.scheduledDate),
                           title: currentVariant.copy.split('\n')[0],
                           description: currentVariant.copy + "\n\nSugerencia IA: " + currentVariant.imageSuggestion,
@@ -394,7 +391,7 @@ export default function NewPlanPage() {
                       {desc && <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>}
                     </div>
                     <svg className="shrink-0 text-neutral-400" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 12l4-4-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                 )
@@ -415,21 +412,20 @@ export default function NewPlanPage() {
                 <button
                   key={view}
                   onClick={() => setCalendarView(view)}
-                  className={`pb-2 px-3 text-sm font-medium transition-colors ${
-                    calendarView === view
+                  className={`pb-2 px-3 text-sm font-medium transition-colors ${calendarView === view
                       ? 'border-b-2 border-brand text-brand'
                       : 'text-neutral-500 hover:text-neutral-700'
-                  }`}
+                    }`}
                 >
-                  {view === 'list' ? 
-                  <div className='flex items-center gap-2'>
-                    <img src="/assets/icons/list.svg" alt="" />
-                    Lista
-                  </div> : 
-                  <div className='flex items-center gap-2'>
-                    <img src="/assets/icons/calendar.svg" alt="" />
-                    Calendario
-                  </div>
+                  {view === 'list' ?
+                    <div className='flex items-center gap-2'>
+                      <img src="/assets/icons/list.svg" alt="" />
+                      Lista
+                    </div> :
+                    <div className='flex items-center gap-2'>
+                      <img src="/assets/icons/calendar.svg" alt="" />
+                      Calendario
+                    </div>
                   }
                 </button>
               ))}
@@ -478,11 +474,10 @@ export default function NewPlanPage() {
                           return (
                             <td key={weekday} className="py-3 px-2 text-center">
                               {cell && (
-                                <span className={`${
-                                  row === 'Canal' ? 'text-pink-600 font-semibold' :
-                                  row === 'Formato' ? 'text-brand font-semibold' :
-                                  'text-neutral-700'
-                                }`}>{cell}</span>
+                                <span className={`${row === 'Canal' ? 'text-pink-600 font-semibold' :
+                                    row === 'Formato' ? 'text-brand font-semibold' :
+                                      'text-neutral-700'
+                                  }`}>{cell}</span>
                               )}
                             </td>
                           )

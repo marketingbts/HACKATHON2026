@@ -1,13 +1,16 @@
+'use client'
+
+import { useEffect, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from './Button'
+import { useImageGeneration } from '@/lib/hooks/use-image-generation'
 
 type ContentCardProps = {
-  image: string
-  imageAlt: string
+  copy?: string
+  description?: string
   date: string
   dateTime?: string
   title: string
-  description: string
   socialNetwork?: string
   format?: string
   recommended?: boolean
@@ -32,12 +35,11 @@ function RecommendedBadge() {
 }
 
 export function ContentCard({
-  image,
-  imageAlt,
+  copy: _copy,
+  description,
   date,
   dateTime,
   title,
-  description,
   socialNetwork,
   format,
   recommended = false,
@@ -47,50 +49,99 @@ export function ContentCard({
   onPrev,
   className,
 }: ContentCardProps) {
+  const { imageUrl, loading, generateImage } = useImageGeneration()
+
+  const handleDownloadImage = useCallback(() => {
+    if (!imageUrl) return
+
+    const link = document.createElement('a')
+    link.href = imageUrl
+    link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'marki-image'}.jpg`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }, [imageUrl, title])
+
+  // Genera la imagen automáticamente cuando el componente monta
+  useEffect(() => {
+    if (description) {
+      generateImage(description)
+    }
+  }, [description, generateImage])
+
   return (
     <article
       className={cn(
-        'relative flex w-full flex-col overflow-hidden',
+        'group relative flex w-full flex-col overflow-hidden',
         'bg-surface-white border border-border-subtle rounded-2xl shadow-sm',
         'transition-all duration-200 hover:shadow-md hover:border-brand-200',
         'h-full',
         className,
       )}
     >
-      {/* Imagen portada */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden group">
-        <img
-          src={image}
-          alt={imageAlt}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+      {/* Imagen generada por HF */}
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+        {loading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-neutral-50">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-400 border-t-transparent" />
+            <span className="text-[10px] text-neutral-400">Generando imagen…</span>
+          </div>
+        )}
+
+        {imageUrl && !loading && (
+          <>
+            <img
+              src={imageUrl}
+              alt={description ?? title}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute right-3 top-3 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDownloadImage()
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/60 bg-white/82 text-neutral-800 shadow-md backdrop-blur-sm transition hover:bg-white"
+                aria-label="Descargar imagen"
+                title="Descargar imagen"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3v11" />
+                  <path d="M7 11l5 5 5-5" />
+                  <path d="M5 21h14" />
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Flechas de navegación */}
         {(onPrev || onNext) && (
-          <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between px-3 opacity-0 transition-all duration-200 group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-between px-3 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 scale-95">
             <button
-              onClick={(e) => { e.stopPropagation(); onPrev?.(); }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/30 text-white backdrop-blur-md transition-all hover:bg-white/50 hover:scale-110 active:scale-95 shadow-md border border-white/20"
+              onClick={(e) => { e.stopPropagation(); onPrev?.() }}
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-white/90 text-neutral-900 shadow-lg transition hover:bg-white focus-visible:bg-white"
               aria-label="Anterior variante"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onNext?.(); }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/30 text-white backdrop-blur-md transition-all hover:bg-white/50 hover:scale-110 active:scale-95 shadow-md border border-white/20"
+              onClick={(e) => { e.stopPropagation(); onNext?.() }}
+              className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-white/90 text-neutral-900 shadow-lg transition hover:bg-white focus-visible:bg-white"
               aria-label="Siguiente variante"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
             </button>
           </div>
         )}
 
-        {/* Overlay badges */}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 pr-10">
+        {/* Badges */}
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {socialNetwork && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-sm shadow-sm text-[9px] font-bold text-brand-700 uppercase tracking-tight">
               {socialNetwork}
@@ -123,15 +174,15 @@ export function ContentCard({
 
         {/* Footer acciones */}
         <div className="mt-auto flex gap-2">
-          <Button 
-            variant="card-primary" 
+          <Button
+            variant="card-primary"
             onClick={onViewMore}
             className="flex-1 py-2 text-[10px] rounded-xl normal-case tracking-normal h-9"
           >
-            Ver más
+            Ver mas
           </Button>
-          <Button 
-            variant="card-secondary" 
+          <Button
+            variant="card-secondary"
             onClick={onEdit}
             className="flex-1 py-2 text-[10px] rounded-xl border border-border-subtle bg-surface-muted normal-case tracking-normal h-9"
           >

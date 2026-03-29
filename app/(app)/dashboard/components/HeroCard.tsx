@@ -153,27 +153,6 @@ export function HeroCard({
               <ArrowForwardIcon sx={{ fontSize: 16 }} />
             </span>
           </button>
-
-          {/* Ghost / outline white button */}
-          <button
-            type="button"
-            onClick={onContinue}
-            className={cn(
-              'inline-flex items-center justify-center gap-2',
-              'w-full sm:w-auto',
-              'rounded-md px-5 py-3',
-              'bg-transparent border border-white/50 font-bold text-base leading-7 text-white',
-              'transition-all duration-150',
-              'hover:bg-white/10 hover:border-white',
-              'active:bg-white/20',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-brand',
-            )}
-          >
-            <span>Continuar</span>
-            <span aria-hidden className="h-4 w-4 shrink-0 flex items-center">
-              <ArrowForwardIcon sx={{ fontSize: 16 }} />
-            </span>
-          </button>
         </div>
       </div>
 

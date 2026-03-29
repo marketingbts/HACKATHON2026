@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { NavItem } from './NavItem'
 
@@ -62,9 +63,19 @@ export function SideNavBar() {
     <aside className="fixed top-0 left-0 w-60 h-screen flex flex-col bg-surface-background border-r border-border-subtle z-40">
       {/* Logo */}
       <div className="p-8 flex flex-col gap-0.5">
-        <span className="font-black text-2xl text-brand-600 tracking-[-0.6px] leading-none">
-          Marki
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-black text-2xl text-brand-600 tracking-[-0.6px] leading-none">
+            Marki
+          </span>
+          <Image
+            src="/assets/icons/marki/marki-icon-4.png"
+            alt=""
+            width={28}
+            height={28}
+            className="h-10 w-10 shrink-0 object-contain"
+            priority
+          />
+        </div>
         <span className="font-medium text-[10px] text-neutral-400 tracking-[2px] uppercase leading-snug">
           Tu CM amigo
         </span>
