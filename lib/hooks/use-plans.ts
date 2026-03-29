@@ -55,3 +55,24 @@ export function usePlans(status?: 'active' | 'archived') {
     }
   })
 }
+
+export function useUpdatePlan() {
+  const queryClient = useQueryClient()
+  return useMutation<ContentPlanResponse, Error, { id: string; status?: 'active' | 'archived' }>({
+    mutationFn: async ({ id, ...body }) => {
+      const res = await fetch(`/api/plans/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Error al actualizar el plan')
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] })
+    }
+  })
+}

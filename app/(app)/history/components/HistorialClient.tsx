@@ -102,20 +102,17 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
                   </span>
                 )}
               </div>
-              <Link href="/calendar">
-                <Button variant="secondary">VER CALENDARIO</Button>
-              </Link>
             </div>
 
             {plans.length === 0 ? (
               <div className="border border-border-subtle rounded-2xl p-10 text-center text-neutral-400 text-sm">
                 Todavía no creaste ningún plan.{' '}
-                <Link href="/plans/new" className="text-brand font-semibold hover:underline">
+                <Link href="/plans" className="text-brand font-semibold hover:underline">
                   Crear uno
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {plans.map((plan) => {
                   const { networks, totalPosts, publishedPosts } = getPlanMeta(plan.id)
                   return (
@@ -125,6 +122,7 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
                       networks={networks}
                       totalPosts={totalPosts}
                       publishedPosts={publishedPosts}
+                      calendarEntries={calendarEntries}
                     />
                   )
                 })}

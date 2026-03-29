@@ -1,84 +1,464 @@
-import Link from 'next/link'
+'use client'
 
-async function getPlans() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/api/plans`, {
-    cache: 'no-store',
-  })
-  return res.json()
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
+import { Multiselect } from '@/components/ui/Multiselect'
+import { GoalOption } from '@/components/ui/GoalOption'
+import { ContentCard } from '@/components/ui/ContentCard'
+import { CalendarList, CalendarRow } from '@/components/ui/CalendarRow'
+import { MarkiExplain } from '@/components/ui/MarkiExplain'
+import { ProductModal } from '@/components/ui/ProductModal'
+import { AudienceModal } from '@/components/ui/AudienceModal'
+import { ContentDetailModal } from '@/components/ui/ContentDetailModal'
+import { ContentEditModal } from '@/components/ui/ContentEditModal'
+import { useAudiences, useProducts } from '@/lib/hooks/use-business'
+import { useGeneratePlan, useSavePlan } from '@/lib/hooks/use-plans'
+import type { GeneratePlanResponse } from '@/lib/types'
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const POST_TYPE_LABEL: Record<string, string> = {
+  post: 'Post', reel: 'Reel', story: 'Historia', carousel: 'Carrusel',
+}
+function formatDate(day: string): string {
+  return new Date(day + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
-export default async function PlansPage() {
-  const plans = await getPlans()
+const TONE_OPTIONS = [
+  { value: 'formal', label: 'Formal' },
+  { value: 'informal', label: 'Informal' },
+  { value: 'cercano', label: 'Cercano' },
+  { value: 'profesional', label: 'Profesional' },
+]
 
-  const active = plans.filter((p: { status: string }) => p.status === 'active')
-  const archived = plans.filter((p: { status: string }) => p.status === 'archived')
+const PERIOD_OPTIONS = [
+  { value: 'day', label: 'Un día' },
+  { value: 'week', label: 'Una semana' },
+  { value: 'month', label: 'Un mes' },
+]
+
+const GOAL_OPTIONS = [
+  {
+    value: 'promote_offer',
+    title: 'Vender más',
+    description: 'Enfocado en conversión y CTA claro.',
+    icon: (
+      <img src="/assets/icons/cart-green.svg" alt="Vender más" />
+    ),
+  },
+  {
+    value: 'gain_followers',
+    title: 'Informar o educar',
+    description: 'Contenido de valor para tu audiencia.',
+    icon: (
+      <img src="/assets/icons/hat-purple.svg" alt="Informar o educar" />
+    ),
+  },
+  {
+    value: 'increase_engagement',
+    title: 'Conectar',
+    description: 'Humanizar la marca y generar empatía.',
+    icon: (
+      <img src="/assets/icons/heart-pink.svg" alt="Conectar" />
+    ),
+  },
+]
+
+export default function PlansPage() {
+  const router = useRouter()
+  const { data: audiences = [] } = useAudiences()
+  const { data: products = [] } = useProducts()
+  const generatePlan = useGeneratePlan()
+  const savePlan = useSavePlan()
+
+  const [result, setResult] = useState<GeneratePlanResponse | null>(null)
+  const [chosenCopies, setChosenCopies] = useState<Record<number, number>>({})
+  const [feedback, setFeedback] = useState('')
+
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  const [selectedAudienceIds, setSelectedAudienceIds] = useState<string[]>([])
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isAudienceModalOpen, setIsAudienceModalOpen] = useState(false)
+  const [initialProductName, setInitialProductName] = useState('')
+  const [initialAudienceName, setInitialAudienceName] = useState('')
+  const [selectedDetailContent, setSelectedDetailContent] = useState<any>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [editingPostIndex, setEditingPostIndex] = useState<number | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const [tone, setTone] = useState('cercano')
+  const [objective, setObjective] = useState(GOAL_OPTIONS[0].value)
+  const [period, setPeriod] = useState<any>('week')
+
+  const productOptions = products.map((p) => ({ value: p.id, label: p.name }))
+  const audienceOptions = audiences.map((a) => ({ value: a.id, label: a.name }))
+
+  async function handleGenerate() {
+    setChosenCopies({})
+    const data = await generatePlan.mutateAsync({
+      objective,
+      tone,
+      productIds: selectedProductIds,
+      audienceIds: selectedAudienceIds,
+      period,
+    })
+    setResult(data)
+  }
+
+  async function handleRefine() {
+    if (!feedback.trim() || !result) return
+    setChosenCopies({})
+    const data = await generatePlan.mutateAsync({
+      objective,
+      tone,
+      productIds: selectedProductIds,
+      audienceIds: selectedAudienceIds,
+      period,
+      feedback,
+      previousPlan: result,
+    })
+    setResult(data)
+    setFeedback('')
+  }
+
+  function handleUpdateCopy(index: number, newCopy: string) {
+    if (!result) return
+    const newPosts = [...result.posts]
+    const copyIdx = chosenCopies[index] ?? 0
+    newPosts[index].variants[copyIdx].copy = newCopy
+    setResult({ ...result, posts: newPosts })
+  }
+
+  async function handleSave() {
+    if (!result) return
+
+    const PERIOD_DAYS: Record<string, number> = { day: 1, week: 7, month: 30 }
+    const periodStart = new Date().toISOString().split('T')[0]
+    const endDate = new Date()
+    endDate.setDate(endDate.getDate() + PERIOD_DAYS[period])
+    const periodEnd = endDate.toISOString().split('T')[0]
+
+    await savePlan.mutateAsync({
+      objective,
+      tone,
+      periodStart,
+      periodEnd,
+      strategySummary: result.strategySummary,
+      recommendedActions: result.recommendedActions,
+      audienceIds: selectedAudienceIds,
+      productIds: selectedProductIds,
+      posts: result.posts.map((p, i) => {
+        const copyIdx = chosenCopies[i] ?? 0
+        return {
+          scheduledDate: p.scheduledDate,
+          network: p.network,
+          format: p.format,
+          copy: p.variants[copyIdx].copy,
+          imageSuggestion: p.variants[copyIdx].imageSuggestion,
+        }
+      }),
+    })
+    router.push('/history')
+  }
 
   return (
     <>
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Mis planes</h1>
-        <Link href="/plans/new" className="bg-black text-white px-4 py-2 rounded text-sm">
-          + Nuevo plan
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-950">Plan de contenido</h1>
+        <p className="text-sm text-neutral-500 mt-1">Revisa y edita cada detalle de tu plan antes de comenzar a trabajar</p>
       </div>
 
-      {active.length === 0 && archived.length === 0 && (
-        <div className="text-center py-16 bg-white border rounded-lg">
-          <p className="text-gray-500 mb-4">Todavía no creaste ningún plan. ¿Empezamos?</p>
-          <Link href="/plans/new" className="bg-black text-white px-6 py-2 rounded text-sm">
-            Crear mi primer plan
-          </Link>
+      <div className="bg-surface-white border border-border-subtle rounded-2xl p-6 flex flex-col gap-6">
+
+          {/* Section header */}
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
+              <img src="/assets/icons/graph-purple.svg" alt="" />
+            </span>
+            <span className="font-bold text-base text-neutral-950">Configuración del Plan</span>
+          </div>
+
+          {/* Producto */}
+          <Multiselect
+            id="select-product"
+            label="¿Qué producto o servicio querés destacar?"
+            options={productOptions}
+            value={selectedProductIds}
+            onChange={setSelectedProductIds}
+            onCreateNew={(name) => {
+              setInitialProductName(name)
+              setIsProductModalOpen(true)
+            }}
+            placeholder="Selecciona tus productos y/o servicios"
+          />
+
+          {/* Audiencia */}
+          <Multiselect
+            id="select-audience"
+            label="¿A quién le querés hablar?"
+            options={audienceOptions}
+            value={selectedAudienceIds}
+            onChange={setSelectedAudienceIds}
+            onCreateNew={(name) => {
+              setInitialAudienceName(name)
+              setIsAudienceModalOpen(true)
+            }}
+            placeholder="Selecciona tus audiencias"
+          />
+
+          {/* Fechas + Tono */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <Select
+                id="select-period"
+                label="¿Cuánto querés que dure la estrategia?"
+                options={PERIOD_OPTIONS}
+                value={period}
+                onChange={setPeriod}
+                placeholder="Seleccioná la duración"
+              />
+            </div>
+
+            <Select
+              id="select-tone"
+              label="Personalidad del mensaje"
+              options={TONE_OPTIONS}
+              value={tone}
+              onChange={setTone}
+              placeholder="Selecciona un tono y voz"
+            />
+          </div>
+
+          {/* Objetivo */}
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-medium text-neutral-700">¿Qué querés lograr con este plan de contenido?</label>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="sr-only">Objetivo del plan</legend>
+              {GOAL_OPTIONS.map((opt) => (
+                <GoalOption
+                  key={opt.value}
+                  name="objective"
+                  value={opt.value}
+                  title={opt.title}
+                  description={opt.description}
+                  icon={opt.icon}
+                  checked={objective === opt.value}
+                  onChange={setObjective}
+                />
+              ))}
+            </fieldset>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="primary" 
+              onClick={handleGenerate} 
+              disabled={generatePlan.isPending || selectedProductIds.length === 0 || selectedAudienceIds.length === 0}
+            >
+              {generatePlan.isPending ? 'Generando tu plan...' : '✦ Generar plan'}
+            </Button>
+          </div>
         </div>
-      )}
 
-      {active.length > 0 && (
-        <section className="mb-8">
-          <h2 className="font-semibold mb-3 text-gray-700">Activos</h2>
-          <div className="flex flex-col gap-3">
-            {active.map((plan: { id: string; objective: string; periodStart: string; periodEnd: string }) => (
-              <Link
-                key={plan.id}
-                href={`/plans/${plan.id}`}
-                className="bg-white border rounded-lg p-4 flex justify-between items-center hover:shadow transition"
-              >
-                <div>
-                  <p className="font-medium">{plan.objective}</p>
-                  <p className="text-sm text-gray-500">
-                    {plan.periodStart} → {plan.periodEnd}
-                  </p>
-                </div>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                  Activo
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        initialName={initialProductName}
+        onSuccess={(id) => setSelectedProductIds((prev) => [...prev, id])}
+      />
 
-      {archived.length > 0 && (
-        <section>
-          <h2 className="font-semibold mb-3 text-gray-400">Archivados</h2>
-          <div className="flex flex-col gap-3">
-            {archived.map((plan: { id: string; objective: string; periodStart: string; periodEnd: string }) => (
-              <Link
-                key={plan.id}
-                href={`/plans/${plan.id}`}
-                className="bg-white border rounded-lg p-4 flex justify-between items-center opacity-60 hover:opacity-80 transition"
-              >
-                <div>
-                  <p className="font-medium">{plan.objective}</p>
-                  <p className="text-sm text-gray-500">
-                    {plan.periodStart} → {plan.periodEnd}
-                  </p>
+      <AudienceModal
+        isOpen={isAudienceModalOpen}
+        onClose={() => setIsAudienceModalOpen(false)}
+        initialName={initialAudienceName}
+        onSuccess={(id) => setSelectedAudienceIds((prev) => [...prev, id])}
+      />
+
+      <ContentDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        content={selectedDetailContent}
+      />
+
+      <ContentEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingPostIndex(null)
+        }}
+        initialCopy={editingPostIndex !== null && result ? result.posts[editingPostIndex].variants[chosenCopies[editingPostIndex] ?? 0].copy : ''}
+        onSave={(newCopy) => {
+          if (editingPostIndex !== null) {
+            handleUpdateCopy(editingPostIndex, newCopy)
+          }
+        }}
+      />
+
+      {result && (
+        <div className="flex flex-col gap-10 mt-5">
+
+          {/* ── 1. Estrategia recomendada ── */}
+          <section className="flex flex-col gap-4">
+            <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+              <span className="text-brand"><img src="/assets/icons/pin.svg" alt="" /></span> 1. Estrategia recomendada
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Resumen de Estrategia */}
+              <div className="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-3 col-span-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
+                    <img src="/assets/icons/speaker.svg" alt="" />
+                  </span>
+                  <span className="font-bold text-sm text-neutral-950">Estrategia Recomendada</span>
                 </div>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                  Archivado
-                </span>
-              </Link>
-            ))}
+                <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">{result.strategySummary}</p>
+              </div>
+
+              {/* Insight de IA */}
+              <MarkiExplain content="Esta estrategia está diseñada para maximizar el impacto en tus audiencias seleccionadas utilizando los productos destacados." />
+            </div>
+          </section>
+
+          {/* ── 2. Piezas de Contenido Generadas ── */}
+          <section className="flex flex-col gap-4">
+            <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+              <img src="/assets/icons/doc.svg" alt="" />
+              2. Piezas de Contenido Generadas
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {result.posts.map((post, i) => {
+                const copyIdx = chosenCopies[i] ?? 0
+                const currentVariant = post.variants[copyIdx]
+
+                return (
+                  <div key={i} className="relative">
+                    <ContentCard
+                      image="https://placehold.co/600x400"
+                      imageAlt=""
+                      date={formatDate(post.scheduledDate)}
+                      dateTime={`${post.scheduledDate}T${result.calendar.find((c) => c.date === post.scheduledDate)?.suggestedTime ?? '11:00'}`}
+                      title={currentVariant.copy.split('\n')[0]}
+                      description={currentVariant.imageSuggestion}
+                      socialNetwork="Instagram"
+                      format={POST_TYPE_LABEL[post.format]}
+                      recommended={i === 0}
+                      onViewMore={() => {
+                        setSelectedDetailContent({
+                          image: "https://placehold.co/600x400",
+                          imageAlt: "",
+                          date: formatDate(post.scheduledDate),
+                          title: currentVariant.copy.split('\n')[0],
+                          description: currentVariant.copy + "\n\nSugerencia IA: " + currentVariant.imageSuggestion,
+                          socialNetwork: "Instagram",
+                          format: POST_TYPE_LABEL[post.format]
+                        })
+                        setIsDetailModalOpen(true)
+                      }}
+                      onEdit={() => {
+                        setEditingPostIndex(i)
+                        setIsEditModalOpen(true)
+                      }}
+                      onNext={() => setChosenCopies((prev) => ({ ...prev, [i]: (copyIdx + 1) % post.variants.length }))}
+                      onPrev={() => setChosenCopies((prev) => ({ ...prev, [i]: (copyIdx - 1 + post.variants.length) % post.variants.length }))}
+                    />
+                  </div>
+                )
+              })}
+              <div className="flex flex-col items-center justify-center min-h-[350px] border-2 border-dashed border-border-subtle rounded-xl text-neutral-400 cursor-pointer hover:border-brand hover:text-brand transition-colors p-6 gap-2">
+                <span className="text-2xl leading-none font-light">+</span>
+                <span className="text-center text-xs leading-snug">Generar pieza adicional</span>
+              </div>
+            </div>
+          </section>
+
+          {/* ── 3. Acciones de Crecimiento ── */}
+          <section className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <span className="text-brand"><img src="/assets/icons/lightning.svg" alt="" /></span> 3. Acciones de Crecimiento
+              </h2>
+              <p className="text-sm text-neutral-500">Seguí estas recomendaciones para potenciar tu plan</p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {result.recommendedActions.map((action: string, i: number) => {
+                const sepIdx = action.indexOf(' | ')
+                const title = sepIdx !== -1 ? action.slice(0, sepIdx) : action
+                const desc = sepIdx !== -1 ? action.slice(sepIdx + 3) : ''
+                return (
+                  <div key={i} className="flex items-center gap-6 bg-surface-white border border-border-subtle rounded-2xl px-6 py-4 transition-colors hover:bg-neutral-50">
+                    <span className="text-sm font-bold text-brand shrink-0 w-6">{String(i + 1).padStart(2, '0')}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-[15px] text-neutral-950">{title}</p>
+                      {desc && <p className="text-sm text-neutral-500 mt-1 leading-relaxed">{desc}</p>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+
+          {/* ── 4. Calendario de Publicación ── */}
+          <section className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <img src="/assets/icons/calendar-purple.svg" alt="" />
+                4. Calendario de Publicación
+              </h2>
+              <p className="text-sm text-neutral-500">Visualizá tus próximas publicaciones ordenadas por fecha y hora</p>
+            </div>
+
+            <CalendarList>
+              {result.calendar
+                .filter((e) => e.type === 'publication')
+                .map((entry, i) => {
+                  const post = result.posts.find((p) => p.scheduledDate === entry.date)
+                  return (
+                    <CalendarRow
+                      key={i}
+                      date={formatDate(entry.date)}
+                      time={entry.suggestedTime}
+                      title={entry.action}
+                      contentType={post ? POST_TYPE_LABEL[post.format] : 'Publicación'}
+                      socialNetwork="Instagram"
+                    />
+                  )
+                })}
+            </CalendarList>
+          </section>
+
+          {/* Feedback / Ajuste de plan */}
+          <section className="flex flex-col gap-3">
+            <div>
+              <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <span>✦</span> ¿Querés ajustar el plan?
+              </h2>
+              <p className="text-sm text-neutral-500">Decile a Marki qué cambiar y regenerará el plan respetando lo que ya funciona.</p>
+            </div>
+            <div className="bg-surface-white border border-border-subtle rounded-xl p-4 flex flex-col gap-3">
+              <textarea
+                className="w-full border border-border-subtle rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand/30"
+                rows={3}
+                placeholder='Ej: "Quiero más reels y un tono más divertido" o "Cambiá el enfoque a promoción del fin de semana"'
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              />
+              <Button variant="outline" onClick={handleRefine} disabled={generatePlan.isPending || !feedback.trim()}>
+                {generatePlan.isPending ? 'Ajustando tu plan...' : '✦ Ajustar plan con este feedback'}
+              </Button>
+            </div>
+          </section>
+
+          {/* Save */}
+          <div className="flex flex-col gap-3 pb-8">
+            <Button variant="primary" onClick={handleSave} disabled={savePlan.isPending}>
+              {savePlan.isPending ? 'Guardando plan...' : 'Guardar plan de contenido'}
+            </Button>
+            <Button variant="outline" onClick={() => { setResult(null) }}>
+              Volver a configurar
+            </Button>
           </div>
-        </section>
+        </div>
       )}
     </>
   )

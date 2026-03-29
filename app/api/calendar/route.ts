@@ -21,19 +21,28 @@ export async function GET() {
     .eq('status', 'active')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!plans?.length) return NextResponse.json({ entries: [] })
 
-  const planIds = plans.map((p) => p.id)
+  const planIds = (plans ?? []).map((p) => p.id)
 
-  const { data: posts } = await supabase
-    .from('content_posts')
+  let posts: any[] = []
+  if (planIds.length > 0) {
+    const { data: postsData } = await supabase
+      .from('content_posts')
+      .select('*')
+      .in('plan_id', planIds)
+      .order('scheduled_date')
+    posts = postsData ?? []
+  }
+
+  const { data: quickGens } = await supabase
+    .from('quick_generations')
     .select('*')
-    .in('plan_id', planIds)
-    .order('scheduled_date')
+    .eq('business_id', business.id)
+    .order('created_at', { ascending: false })
 
   const planMap = Object.fromEntries(plans.map((p) => [p.id, p.objective]))
 
-  const entries = (posts ?? []).map((post) => ({
+  const planEntries = (posts ?? []).map((post) => ({
     date: post.scheduled_date,
     planId: post.plan_id,
     planObjective: planMap[post.plan_id] ?? null,
@@ -42,7 +51,30 @@ export async function GET() {
     format: post.format,
     copy: post.copy,
     imageSuggestion: post.image_suggestion,
+    source: 'plan'
   }))
 
-  return NextResponse.json({ entries })
+  const quickEntries = (quickGens ?? []).map((gen) => ({
+    date: gen.created_at.split('T')[0],
+    planId: null,
+    planObjective: 'Generación Rápida',
+    postId: gen.id,
+    network: 'Instagram', // Por ahora asumimos Instagram para quick gens
+    format: gen.format,
+    copy: gen.copy,
+    imageSuggestion: gen.image_suggestion,
+    source: 'quick'
+  }))
+
+  const allEntries = [...planEntries, ...quickEntries].sort((a, b) => {
+    const dateA = a.date ?? ''
+    const dateB = b.date ?? ''
+    return dateB.localeCompare(dateA)
+  })
+
+  return NextResponse.json({ 
+    planEntries,
+    quickEntries,
+    entries: allEntries
+  })
 }

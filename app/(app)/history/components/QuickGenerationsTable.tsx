@@ -43,9 +43,10 @@ export function QuickGenerationsTable({ generations }: QuickGenerationsTableProp
                 </p>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right">
-                <button 
-                  onClick={() => navigator.clipboard.writeText(gen.copy)}
-                  className="text-xs font-bold text-brand hover:text-brand-700 transition-colors"
+                <button
+                  onClick={() => navigator.clipboard.writeText(gen.copy ?? '')}
+                  className="text-xs font-bold text-brand disabled:opacity-50 disabled:cursor-not-allowed hover:text-brand-700 transition-colors"
+                  disabled={!gen.copy}
                 >
                   Copiar
                 </button>

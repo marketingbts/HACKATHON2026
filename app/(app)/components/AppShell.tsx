@@ -17,7 +17,6 @@ export function AppShell({ brandName, children }: AppShellProps) {
     if (pathname.startsWith('/plans')) return 'Plan de contenido'
     if (pathname === '/settings') return 'Configuración'
     if (pathname === '/generate') return 'Generación rápida'
-    if (pathname === '/calendar') return 'Calendario'
     return brandName
   })()
 
