@@ -28,51 +28,19 @@ function RecommendedBadge() {
 
 function RefreshIcon() {
   return (
-    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path
-        d="M1.5 7A5.5 5.5 0 0 1 12 4.5M12.5 7A5.5 5.5 0 0 1 2 9.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M10 2.5l2 2-2 2M4 9.5l-2 2 2 2"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <img src="/assets/icons/refresh.svg" alt="" />
   )
 }
 
 function CopyIcon() {
   return (
-    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M3 11V3.5A1.5 1.5 0 0 1 4.5 2H11"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    <img src="/assets/icons/copy.svg" alt="" />
   )
 }
 
 function ImageIcon() {
   return (
-    <svg aria-hidden="true" width="18" height="15" viewBox="0 0 18 15" fill="none">
-      <rect x="0.75" y="0.75" width="16.5" height="13.5" rx="1.75" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="5.5" cy="5" r="1.5" fill="currentColor" />
-      <path
-        d="M1 11l4-4 3 3 2.5-2.5L14 11"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <img src="/assets/icons/edit-copy.svg" alt="" />
   )
 }
 
