@@ -1,16 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import type { GenerateQuickResponse, AIVariant } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { GoalOption } from '@/components/ui/GoalOption'
 import { GeneratedContentCard } from '@/components/ui/GeneratedContentCard'
 import { Multiselect } from '@/components/ui/Multiselect'
+import { ProductModal } from '@/components/ui/ProductModal'
+import { AudienceModal } from '@/components/ui/AudienceModal'
+import { useAudiences, useProducts } from '@/lib/hooks/use-business'
+import { useGenerateQuick, useSaveQuick } from '@/lib/hooks/use-quick-gen'
 
-const FORMATS = ['post', 'reel', 'carrusel', 'historia']
+const FORMAT_OPTIONS = [
+  { value: 'post', label: 'Post' },
+  { value: 'reel', label: 'Reel' },
+  { value: 'carrusel', label: 'Carrusel' },
+  { value: 'historia', label: 'Historia' },
+]
 
-  const GOAL_OPTIONS = [
+const GOAL_OPTIONS = [
     {
       value: 'promote_offer',
       title: 'Vender más',
@@ -38,16 +48,28 @@ const FORMATS = ['post', 'reel', 'carrusel', 'historia']
   ]
 
 export default function GeneratePage() {
+  const router = useRouter()
+  const { data: audiencesList = [] } = useAudiences()
+  const { data: productsList = [] } = useProducts()
+  const generateQuick = useGenerateQuick()
+  const saveQuick = useSaveQuick()
+
   const [format, setFormat] = useState('post')
   const [detail, setDetail] = useState('')
-  const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<GenerateQuickResponse | null>(null)
-  const [chosen, setChosen] = useState<AIVariant | null>(null)
-  const [saved, setSaved] = useState(false)
-  const [products, setProducts] = useState<string[]>([])
-  const [audiences, setAudiences] = useState<string[]>([])
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  const [selectedAudienceIds, setSelectedAudienceIds] = useState<string[]>([])
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isAudienceModalOpen, setIsAudienceModalOpen] = useState(false)
+  const [initialProductName, setInitialProductName] = useState('')
+  const [initialAudienceName, setInitialAudienceName] = useState('')
+
+
   const [tone, setTone] = useState('cercano')
   const [objective, setObjective] = useState(GOAL_OPTIONS[0].value)
+
+  const productOptions = productsList.map((p) => ({ value: p.id, label: p.name }))
+  const audienceOptions = audiencesList.map((a) => ({ value: a.id, label: a.name }))
 
   const TONE_OPTIONS = [
     { value: 'formal', label: 'Formal' },
@@ -57,29 +79,25 @@ export default function GeneratePage() {
   ]
 
   async function handleGenerate() {
-    setLoading(true)
-    setResult(null)
-    setChosen(null)
-    setSaved(false)
-
-    const res = await fetch('/api/generate/quick', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format, detail }),
+    const data = await generateQuick.mutateAsync({ 
+      format: format as any, 
+      detail,
+      productId: selectedProductIds[0], // Quick gen supports 1 at backend currently
+      audienceName: audiencesList.find(a => a.id === selectedAudienceIds[0])?.name
     })
-    const data: GenerateQuickResponse = await res.json()
     setResult(data)
-    setLoading(false)
   }
 
-  async function handleSave() {
-    if (!chosen) return
-    await fetch('/api/quick-generations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format, detail, copy: chosen.copy, imageSuggestion: chosen.imageSuggestion }),
+  async function handleSave(variant: AIVariant) {
+    await saveQuick.mutateAsync({ 
+      format, 
+      detail, 
+      copy: variant.copy, 
+      imageSuggestion: variant.imageSuggestion,
+      productId: selectedProductIds[0],
+      audienceName: audiencesList.find(a => a.id === selectedAudienceIds[0])?.name
     })
-    setSaved(true)
+    router.push('/dashboard')
   }
 
   return (
@@ -97,9 +115,9 @@ export default function GeneratePage() {
         </div>
 
         <Select
-          id="select-product"
+          id="select-format"
           label="¿Cómo querés publicarlo?"
-          options={[]}
+          options={FORMAT_OPTIONS}
           value={format}
           onChange={setFormat}
           placeholder="Selecciona como querés publicar contenido"
@@ -107,22 +125,28 @@ export default function GeneratePage() {
 
 
         <Multiselect
-          id="preview-multiselect"
+          id="select-product"
           label="¿Qué producto o servicio querés destacar?"
-          options={[]}
-          value={products}
-          onChange={setProducts}
-          onCreateNew={(label) => alert(`Crear: ${label}`)}
+          options={productOptions}
+          value={selectedProductIds}
+          onChange={setSelectedProductIds}
+          onCreateNew={(name) => {
+            setInitialProductName(name)
+            setIsProductModalOpen(true)
+          }}
           placeholder="Selecciona tus productos y/o servicios"
         />
 
         <Multiselect
-          id="preview-multiselect"
+          id="select-audience"
           label="¿A quién le querés hablar?"
-          options={[]}
-          value={audiences}
-          onChange={setAudiences}
-          onCreateNew={(label) => alert(`Crear: ${label}`)}
+          options={audienceOptions}
+          value={selectedAudienceIds}
+          onChange={setSelectedAudienceIds}
+          onCreateNew={(name) => {
+            setInitialAudienceName(name)
+            setIsAudienceModalOpen(true)
+          }}
           placeholder="Selecciona tus audiencias"
         />
 
@@ -154,11 +178,29 @@ export default function GeneratePage() {
           </fieldset>
         </div>
         <div className="flex flex-col gap-2">
-          <Button variant="primary" onClick={handleGenerate} disabled={loading}>
-              {loading ? 'Generando tu contenido...' : '✦ Generar contenido'}
+          <Button 
+            variant="primary" 
+            onClick={handleGenerate} 
+            disabled={generateQuick.isPending || selectedProductIds.length === 0 || selectedAudienceIds.length === 0}
+          >
+              {generateQuick.isPending ? 'Generando tu contenido...' : '✦ Generar contenido'}
             </Button>
         </div>
       </div>
+
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        initialName={initialProductName}
+        onSuccess={(id) => setSelectedProductIds([id])}
+      />
+
+      <AudienceModal
+        isOpen={isAudienceModalOpen}
+        onClose={() => setIsAudienceModalOpen(false)}
+        initialName={initialAudienceName}
+        onSuccess={(id) => setSelectedAudienceIds([id])}
+      />
 
       {/* Variantes generadas */}
       {result && (
@@ -174,11 +216,27 @@ export default function GeneratePage() {
                 imageHint={`Sugerencia: ${v.imageSuggestion}`}
                 recommended={i === 0}
                 onRegenerate={handleGenerate}
-                onCopy={(text) => navigator.clipboard.writeText(text)}
-                onSave={(text) => {
-                  setChosen(v)
-                  handleSave()
+                onCopy={(text) => {
+                  if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text)
+                  } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    textArea.style.top = "0";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                      document.execCommand('copy');
+                    } catch (err) {
+                      console.error('Error al copiar: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                  }
                 }}
+                onSave={() => handleSave(v)}
               />
             ))}
           </div>

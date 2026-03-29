@@ -119,7 +119,14 @@ export interface CreateContentPlanRequest {
 }
 
 export interface SaveContentPlanRequest {
-  planId: string
+  objective: string
+  tone: string
+  periodStart: string
+  periodEnd: string
+  strategySummary: string
+  recommendedActions: string[]
+  audienceIds: string[]
+  productIds: string[]
   posts: Array<{
     scheduledDate: string
     network: string
@@ -193,10 +200,16 @@ export interface AIPlanPost {
 }
 
 export interface GeneratePlanResponse {
-  planId: string
   strategySummary: string
   recommendedActions: string[]
   posts: AIPlanPost[]
+  calendar: Array<{
+    date: string
+    action: string
+    type: string
+    goal: string
+    suggestedTime: string
+  }>
 }
 
 // ─── Utils → IA ───────────────────────────────────────────────────────────────

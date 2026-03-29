@@ -152,79 +152,43 @@ export async function POST(req: Request) {
     })
   }
 
-  // 4. Crear plan en DB (solo en generación inicial)
-  const periodStart = new Date().toISOString().split('T')[0]
-  const endDate = new Date()
-  endDate.setDate(endDate.getDate() + PERIOD_DAYS[period])
-  const periodEnd = endDate.toISOString().split('T')[0]
-
-  const { data: planRow, error: planError } = await supabase
-    .from('content_plans')
-    .insert({ business_id: businessRow.id, objective, tone, period_start: periodStart, period_end: periodEnd, status: 'active' })
-    .select()
-    .single()
-
-  if (planError || !planRow) {
-    return NextResponse.json({ error: 'Error al crear el plan' }, { status: 500 })
-  }
-
-  // 5. Asociar audiencias y productos al plan
-  const junctionInserts = []
-  if (audienceIds?.length) {
-    junctionInserts.push(
-      supabase.from('content_plan_audiences')
-        .insert(audienceIds.map((id: string) => ({ plan_id: planRow.id, audience_id: id })))
-        .then()
-    )
-  }
-  if (productIds?.length) {
-    junctionInserts.push(
-      supabase.from('content_plan_products')
-        .insert(productIds.map((id: string) => ({ plan_id: planRow.id, product_id: id })))
-        .then()
-    )
-  }
-  await Promise.all(junctionInserts)
-
-  // 6. Llamar a la IA
+  // 4. Llamar a la IA
   let aiRaw: string
   try {
     aiRaw = await callAIWithRetry(promptBody)
   } catch {
-    await supabase.from('content_plans').delete().eq('id', planRow.id)
     return NextResponse.json(
       { error: 'No pudimos generar el contenido. Verificá tu conexión e intentá de nuevo.' },
       { status: 503 }
     )
   }
 
-  // 7. Parsear respuesta
+  // 5. Parsear respuesta
   let parsed: AIPlanResponse
   try {
     parsed = JSON.parse(aiRaw)
   } catch {
-    await supabase.from('content_plans').delete().eq('id', planRow.id)
     return NextResponse.json(
       { error: 'No pudimos generar el contenido. Verificá tu conexión e intentá de nuevo.' },
       { status: 503 }
     )
   }
 
-  // 8. Actualizar plan con datos de la IA
+  // 6. Armar respuesta
   const strategySummary = buildStrategySummary(parsed.strategy_summary)
-  await supabase
-    .from('content_plans')
-    .update({ strategy_summary: strategySummary, recommended_actions: parsed.recommended_actions ?? [], updated_at: new Date().toISOString() })
-    .eq('id', planRow.id)
-
-  // 9. Armar respuesta
   const network = business.socialNetworks[0] ?? 'instagram'
   const posts = mapPostsToVariants(parsed.posts ?? [], network)
 
   return NextResponse.json({
-    planId: planRow.id,
     strategySummary,
     recommendedActions: parsed.recommended_actions ?? [],
     posts,
+    calendar: (parsed.calendar ?? []).map((e) => ({
+      date: e.date,
+      action: e.action,
+      type: e.type,
+      goal: e.goal,
+      suggestedTime: e.suggested_time,
+    })),
   })
 }

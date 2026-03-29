@@ -4,32 +4,18 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { Multiselect } from '@/components/ui/Multiselect'
 import { GoalOption } from '@/components/ui/GoalOption'
 import { ContentCard } from '@/components/ui/ContentCard'
 import { CalendarList, CalendarRow } from '@/components/ui/CalendarRow'
 import { MarkiExplain } from '@/components/ui/MarkiExplain'
-
-// ── Local types ─────────────────────────────────────────────────────────────
-type PlanCopy = { text: string; visual_description: string }
-type PlanPost = {
-  day: string
-  type: 'post' | 'reel' | 'story' | 'carousel'
-  goal: string
-  copies: PlanCopy[]
-}
-type PlanCalendarEntry = {
-  day: string
-  action: string
-  type: 'publication' | 'action'
-  goal: string
-  suggested_time: string
-}
-type PlanResult = {
-  strategy_summary: { approach: string; content_focus: string; timeline_explanation: string }
-  posts: PlanPost[]
-  recommended_actions: string[]
-  calendar: PlanCalendarEntry[]
-}
+import { ProductModal } from '@/components/ui/ProductModal'
+import { AudienceModal } from '@/components/ui/AudienceModal'
+import { ContentDetailModal } from '@/components/ui/ContentDetailModal'
+import { ContentEditModal } from '@/components/ui/ContentEditModal'
+import { useAudiences, useProducts } from '@/lib/hooks/use-business'
+import { useGeneratePlan, useSavePlan } from '@/lib/hooks/use-plans'
+import type { GeneratePlanResponse, AIPlanPost } from '@/lib/types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const POST_TYPE_LABEL: Record<string, string> = {
@@ -79,102 +65,102 @@ const GOAL_OPTIONS = [
   },
 ]
 
-function derivePeriod(start: string, end: string): string {
-  if (!start || !end) return 'week'
-  const diff = Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
-  if (diff <= 1) return 'day'
-  if (diff <= 8) return 'week'
-  return 'month'
-}
-
 export default function NewPlanPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<PlanResult | null>(null)
+  const { data: audiences = [] } = useAudiences()
+  const { data: products = [] } = useProducts()
+  const generatePlan = useGeneratePlan()
+  const savePlan = useSavePlan()
+
+  const [result, setResult] = useState<GeneratePlanResponse | null>(null)
   const [chosenCopies, setChosenCopies] = useState<Record<number, number>>({})
-  const [saved, setSaved] = useState(false)
   const [calendarView, setCalendarView] = useState<'list' | 'grid'>('list')
   const [feedback, setFeedback] = useState('')
-  const [refining, setRefining] = useState(false)
 
-  const [productOptions, setProductOptions] = useState<{ value: string; label: string }[]>([])
-  const [audienceOptions, setAudienceOptions] = useState<{ value: string; label: string }[]>([])
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  const [selectedAudienceIds, setSelectedAudienceIds] = useState<string[]>([])
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isAudienceModalOpen, setIsAudienceModalOpen] = useState(false)
+  const [initialProductName, setInitialProductName] = useState('')
+  const [initialAudienceName, setInitialAudienceName] = useState('')
+  const [selectedDetailContent, setSelectedDetailContent] = useState<any>(null)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [editingPostIndex, setEditingPostIndex] = useState<number | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-  const [product, setProduct] = useState('')
-  const [audience, setAudience] = useState('')
   const [tone, setTone] = useState('cercano')
   const [objective, setObjective] = useState(GOAL_OPTIONS[0].value)
-  const [period, setPeriod] = useState('')
+  const [period, setPeriod] = useState<any>('week')
 
-  useEffect(() => {
-    fetch('/api/products', { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: { id: string; name: string }[]) => {
-        const options = data.map((p) => ({ value: p.id, label: p.name }))
-        setProductOptions(options)
-        if (options.length > 0) setProduct(options[0].value)
-      })
-
-    fetch('/api/audiences', { credentials: 'include' })
-      .then((r) => r.json())
-      .then((data: { id: string; name: string }[]) => {
-        const options = data.map((a) => ({ value: a.id, label: a.name }))
-        setAudienceOptions(options)
-        if (options.length > 0) setAudience(options[0].value)
-      })
-  }, [])
+  const productOptions = products.map((p) => ({ value: p.id, label: p.name }))
+  const audienceOptions = audiences.map((a) => ({ value: a.id, label: a.name }))
 
   async function handleGenerate() {
-    setLoading(true)
-    setResult(null)
     setChosenCopies({})
-    const res = await fetch('/api/generate/plan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ objective, tone, product, audience, period }),
+    const data = await generatePlan.mutateAsync({
+      objective,
+      tone,
+      productIds: selectedProductIds,
+      audienceIds: selectedAudienceIds,
+      period,
     })
-    const data: PlanResult = await res.json()
     setResult(data)
-    setLoading(false)
   }
 
   async function handleRefine() {
     if (!feedback.trim() || !result) return
-    setRefining(true)
     setChosenCopies({})
-    const res = await fetch('/api/generate/plan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ objective, tone, product, audience, period, feedback, previousPlan: result }),
+    const data = await generatePlan.mutateAsync({
+      objective,
+      tone,
+      productIds: selectedProductIds,
+      audienceIds: selectedAudienceIds,
+      period,
+      feedback,
+      previousPlan: result,
     })
-    const data: PlanResult = await res.json()
     setResult(data)
     setFeedback('')
-    setRefining(false)
+  }
+
+  function handleUpdateCopy(index: number, newCopy: string) {
+    if (!result) return
+    const newPosts = [...result.posts]
+    const copyIdx = chosenCopies[index] ?? 0
+    newPosts[index].variants[copyIdx].copy = newCopy
+    setResult({ ...result, posts: newPosts })
   }
 
   async function handleSave() {
     if (!result) return
-    const posts = result.posts.map((p, i) => {
-      const copyIdx = chosenCopies[i] ?? 0
-      return {
-        scheduledDate: p.day,
-        network: 'instagram',
-        format: p.type,
-        copy: p.copies[copyIdx].text,
-        imageSuggestion: p.copies[copyIdx].visual_description,
-      }
+
+    const PERIOD_DAYS: Record<string, number> = { day: 1, week: 7, month: 30 }
+    const periodStart = new Date().toISOString().split('T')[0]
+    const endDate = new Date()
+    endDate.setDate(endDate.getDate() + PERIOD_DAYS[period])
+    const periodEnd = endDate.toISOString().split('T')[0]
+
+    await savePlan.mutateAsync({
+      objective,
+      tone,
+      periodStart,
+      periodEnd,
+      strategySummary: result.strategySummary,
+      recommendedActions: result.recommendedActions,
+      audienceIds: selectedAudienceIds,
+      productIds: selectedProductIds,
+      posts: result.posts.map((p, i) => {
+        const copyIdx = chosenCopies[i] ?? 0
+        return {
+          scheduledDate: p.scheduledDate,
+          network: p.network,
+          format: p.format,
+          copy: p.variants[copyIdx].copy,
+          imageSuggestion: p.variants[copyIdx].imageSuggestion,
+        }
+      }),
     })
-    await fetch('/api/plans', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ posts }),
-    })
-    setSaved(true)
-    setTimeout(() => router.push('/plans'), 1000)
+    router.push('/plans')
   }
 
   return (
@@ -195,22 +181,30 @@ export default function NewPlanPage() {
           </div>
 
           {/* Producto */}
-          <Select
+          <Multiselect
             id="select-product"
             label="¿Qué producto o servicio querés destacar?"
             options={productOptions}
-            value={product}
-            onChange={setProduct}
+            value={selectedProductIds}
+            onChange={setSelectedProductIds}
+            onCreateNew={(name) => {
+              setInitialProductName(name)
+              setIsProductModalOpen(true)
+            }}
             placeholder="Selecciona tus productos y/o servicios"
           />
 
           {/* Audiencia */}
-          <Select
+          <Multiselect
             id="select-audience"
             label="¿A quién le querés hablar?"
             options={audienceOptions}
-            value={audience}
-            onChange={setAudience}
+            value={selectedAudienceIds}
+            onChange={setSelectedAudienceIds}
+            onCreateNew={(name) => {
+              setInitialAudienceName(name)
+              setIsAudienceModalOpen(true)
+            }}
             placeholder="Selecciona tus audiencias"
           />
 
@@ -258,11 +252,49 @@ export default function NewPlanPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Button variant="primary" onClick={handleGenerate} disabled={loading}>
-              {loading ? 'Generando tu plan...' : '✦ Generar plan'}
+            <Button 
+              variant="primary" 
+              onClick={handleGenerate} 
+              disabled={generatePlan.isPending || selectedProductIds.length === 0 || selectedAudienceIds.length === 0}
+            >
+              {generatePlan.isPending ? 'Generando tu plan...' : '✦ Generar plan'}
             </Button>
           </div>
         </div>
+
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        initialName={initialProductName}
+        onSuccess={(id) => setSelectedProductIds((prev) => [...prev, id])}
+      />
+
+      <AudienceModal
+        isOpen={isAudienceModalOpen}
+        onClose={() => setIsAudienceModalOpen(false)}
+        initialName={initialAudienceName}
+        onSuccess={(id) => setSelectedAudienceIds((prev) => [...prev, id])}
+      />
+
+      <ContentDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        content={selectedDetailContent}
+      />
+
+      <ContentEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingPostIndex(null)
+        }}
+        initialCopy={editingPostIndex !== null && result ? result.posts[editingPostIndex].variants[chosenCopies[editingPostIndex] ?? 0].copy : ''}
+        onSave={(newCopy) => {
+          if (editingPostIndex !== null) {
+            handleUpdateCopy(editingPostIndex, newCopy)
+          }
+        }}
+      />
 
       {result && (
         <div className="flex flex-col gap-10 mt-5">
@@ -273,37 +305,19 @@ export default function NewPlanPage() {
               <span className="text-brand"><img src="/assets/icons/pin.svg" alt="" /></span> 1. Estrategia recomendada
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Pilares de Contenido */}
-              <div className="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
-                    <img src="/assets/icons/head.svg" alt="" />
-                  </span>
-                  <span className="font-bold text-sm text-neutral-950">Pilares de Contenido</span>
-                </div>
-                <ul className="flex flex-col gap-1.5">
-                  {result.strategy_summary.content_focus.split('·').map((item, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-neutral-700">
-                      <span className="text-green-600 font-bold">✓</span>
-                      {item.trim()}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Propuesta de Valor */}
-              <div className="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-3">
+              {/* Resumen de Estrategia */}
+              <div className="bg-surface-white border border-border-subtle rounded-xl p-5 flex flex-col gap-3 col-span-2">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
                     <img src="/assets/icons/speaker.svg" alt="" />
                   </span>
-                  <span className="font-bold text-sm text-neutral-950">Propuesta de Valor</span>
+                  <span className="font-bold text-sm text-neutral-950">Estrategia Recomendada</span>
                 </div>
-                <p className="text-sm text-neutral-600 leading-relaxed">{result.strategy_summary.approach}</p>
+                <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap">{result.strategySummary}</p>
               </div>
 
               {/* Insight de IA */}
-              <MarkiExplain content={result.strategy_summary.timeline_explanation} />
+              <MarkiExplain content="Esta estrategia está diseñada para maximizar el impacto en tus audiencias seleccionadas utilizando los productos destacados." />
             </div>
           </section>
 
@@ -313,25 +327,46 @@ export default function NewPlanPage() {
               <img src="/assets/icons/doc.svg" alt="" />
               2. Piezas de Contenido Generadas
             </h2>
-            <div className="flex flex-nowrap gap-4 overflow-x-auto pb-3 -mx-6 px-6" style={{ scrollSnapType: 'x mandatory' }}>
-              {result.posts.map((post, i) => (
-                <div key={i} className=" shrink-0" style={{ scrollSnapAlign: 'start' }}>
-                  <ContentCard
-                    image="https://placehold.co/600x400"
-                    imageAlt=""
-                    date={formatDate(post.day)}
-                    dateTime={`${post.day}T${result.calendar.find((c) => c.day === post.day)?.suggested_time ?? '11:00'}`}
-                    title={post.copies[chosenCopies[i] ?? 0].text.split('\n')[0]}
-                    description={post.copies[chosenCopies[i] ?? 0].visual_description}
-                    socialNetwork="Instagram"
-                    format={POST_TYPE_LABEL[post.type]}
-                    recommended={i === 0}
-                    onViewMore={() => setChosenCopies((prev) => ({ ...prev, [i]: ((prev[i] ?? 0) + 1) % post.copies.length }))}
-                    onEdit={() => {}}
-                  />
-                </div>
-              ))}
-              <div className="shrink-0 flex flex-col items-center justify-center border-2 border-dashed border-border-subtle rounded-xl text-neutral-400 cursor-pointer hover:border-brand hover:text-brand transition-colors p-6 gap-2" style={{ scrollSnapAlign: 'start' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {result.posts.map((post, i) => {
+                const copyIdx = chosenCopies[i] ?? 0
+                const currentVariant = post.variants[copyIdx]
+
+                return (
+                  <div key={i} className="relative">
+                    <ContentCard
+                      image="https://placehold.co/600x400"
+                      imageAlt=""
+                      date={formatDate(post.scheduledDate)}
+                      dateTime={`${post.scheduledDate}T${result.calendar.find((c) => c.date === post.scheduledDate)?.suggestedTime ?? '11:00'}`}
+                      title={currentVariant.copy.split('\n')[0]}
+                      description={currentVariant.imageSuggestion}
+                      socialNetwork="Instagram"
+                      format={POST_TYPE_LABEL[post.format]}
+                      recommended={i === 0}
+                      onViewMore={() => {
+                        setSelectedDetailContent({
+                          image: "https://placehold.co/600x400",
+                          imageAlt: "",
+                          date: formatDate(post.scheduledDate),
+                          title: currentVariant.copy.split('\n')[0],
+                          description: currentVariant.copy + "\n\nSugerencia IA: " + currentVariant.imageSuggestion,
+                          socialNetwork: "Instagram",
+                          format: POST_TYPE_LABEL[post.format]
+                        })
+                        setIsDetailModalOpen(true)
+                      }}
+                      onEdit={() => {
+                        setEditingPostIndex(i)
+                        setIsEditModalOpen(true)
+                      }}
+                      onNext={() => setChosenCopies((prev) => ({ ...prev, [i]: (copyIdx + 1) % post.variants.length }))}
+                      onPrev={() => setChosenCopies((prev) => ({ ...prev, [i]: (copyIdx - 1 + post.variants.length) % post.variants.length }))}
+                    />
+                  </div>
+                )
+              })}
+              <div className="flex flex-col items-center justify-center min-h-[350px] border-2 border-dashed border-border-subtle rounded-xl text-neutral-400 cursor-pointer hover:border-brand hover:text-brand transition-colors p-6 gap-2">
                 <span className="text-2xl leading-none font-light">+</span>
                 <span className="text-center text-xs leading-snug">Generar pieza adicional</span>
               </div>
@@ -347,7 +382,7 @@ export default function NewPlanPage() {
               <p className="text-sm text-neutral-500">Expandí cada acción para conocer más detalles</p>
             </div>
             <div className="flex flex-col gap-3">
-              {result.recommended_actions.map((action, i) => {
+              {result.recommendedActions.map((action: string, i: number) => {
                 const sepIdx = action.indexOf(' | ')
                 const title = sepIdx !== -1 ? action.slice(0, sepIdx) : action
                 const desc = sepIdx !== -1 ? action.slice(sepIdx + 3) : ''
@@ -407,8 +442,8 @@ export default function NewPlanPage() {
                   .map((entry, i) => (
                     <CalendarRow
                       key={i}
-                      date={formatDate(entry.day)}
-                      time={entry.suggested_time}
+                      date={formatDate(entry.date)}
+                      time={entry.suggestedTime}
                       title={entry.action}
                       contentType="Publicación"
                       socialNetwork="Instagram"
@@ -433,13 +468,13 @@ export default function NewPlanPage() {
                       <tr key={row} className="border-b border-border-subtle last:border-0">
                         <td className="text-neutral-500 py-3 px-4 font-medium">{row}</td>
                         {[0, 1, 2, 3, 4, 5, 6].map((weekday) => {
-                          const entry = result.calendar.find((e) => new Date(e.day).getDay() === weekday)
-                          const post = entry ? result.posts.find((p) => p.day === entry.day) : null
+                          const entry = result.calendar.find((e) => new Date(e.date + 'T12:00:00').getDay() === (weekday === 0 ? 0 : weekday))
+                          const post = entry ? result.posts.find((p) => p.scheduledDate === entry.date) : null
                           let cell = ''
                           if (entry && row === 'Publicación') cell = entry.action
                           if (entry && row === 'Objetivo') cell = entry.goal
                           if (entry && row === 'Canal') cell = 'Instagram'
-                          if (post && row === 'Formato') cell = POST_TYPE_LABEL[post.type]
+                          if (post && row === 'Formato') cell = POST_TYPE_LABEL[post.format]
                           return (
                             <td key={weekday} className="py-3 px-2 text-center">
                               {cell && (
@@ -476,18 +511,18 @@ export default function NewPlanPage() {
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
               />
-              <Button variant="outline" onClick={handleRefine} disabled={refining || !feedback.trim()}>
-                {refining ? 'Ajustando tu plan...' : '✦ Ajustar plan con este feedback'}
+              <Button variant="outline" onClick={handleRefine} disabled={generatePlan.isPending || !feedback.trim()}>
+                {generatePlan.isPending ? 'Ajustando tu plan...' : '✦ Ajustar plan con este feedback'}
               </Button>
             </div>
           </section>
 
           {/* Save */}
           <div className="flex flex-col gap-3 pb-8">
-            <Button variant="primary" onClick={handleSave} disabled={saved}>
-              {saved ? 'Plan guardado ✓' : 'Guardar plan de contenido'}
+            <Button variant="primary" onClick={handleSave} disabled={savePlan.isPending}>
+              {savePlan.isPending ? 'Guardando plan...' : 'Guardar plan de contenido'}
             </Button>
-            <Button variant="outline" onClick={() => { setResult(null); setSaved(false) }}>
+            <Button variant="outline" onClick={() => { setResult(null) }}>
               Volver a configurar
             </Button>
           </div>

@@ -38,21 +38,17 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const body = await req.json()
-  const { objective, tone, period, audienceIds, productIds } = body
-
-  if (!objective || !tone || !period) {
-    return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
-  }
-
-  const periodDays: Record<string, number> = { day: 1, week: 7, month: 30 }
-  if (!periodDays[period]) {
-    return NextResponse.json({ error: 'period debe ser day, week o month' }, { status: 400 })
-  }
-
-  const periodStart = new Date().toISOString().split('T')[0]
-  const end = new Date()
-  end.setDate(end.getDate() + periodDays[period])
-  const periodEnd = end.toISOString().split('T')[0]
+  const { 
+    objective, 
+    tone, 
+    periodStart, 
+    periodEnd, 
+    strategySummary, 
+    recommendedActions, 
+    audienceIds, 
+    productIds, 
+    posts 
+  } = body
 
   const { data: business } = await supabase
     .from('businesses')
@@ -62,6 +58,7 @@ export async function POST(req: Request) {
 
   if (!business) return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
 
+  // 1. Crear el plan
   const { data: plan, error: planError } = await supabase
     .from('content_plans')
     .insert({
@@ -70,6 +67,8 @@ export async function POST(req: Request) {
       tone,
       period_start: periodStart,
       period_end: periodEnd,
+      strategy_summary: strategySummary,
+      recommended_actions: recommendedActions,
       status: 'active',
     })
     .select()
@@ -81,23 +80,46 @@ export async function POST(req: Request) {
 
   const insertPromises = []
 
+  // 2. Asociar audiencias
   if (audienceIds?.length) {
     insertPromises.push(
       supabase.from('content_plan_audiences').insert(
         audienceIds.map((id: string) => ({ plan_id: plan.id, audience_id: id }))
-      ).then()
+      )
     )
   }
 
+  // 3. Asociar productos
   if (productIds?.length) {
     insertPromises.push(
       supabase.from('content_plan_products').insert(
         productIds.map((id: string) => ({ plan_id: plan.id, product_id: id }))
-      ).then()
+      )
     )
   }
 
-  await Promise.all(insertPromises)
+  // 4. Guardar los posts seleccionados
+  if (posts?.length) {
+    insertPromises.push(
+      supabase.from('content_posts').insert(
+        posts.map((p: any) => ({
+          plan_id: plan.id,
+          scheduled_date: p.scheduledDate,
+          network: p.network,
+          format: p.format,
+          copy: p.copy,
+          image_suggestion: p.imageSuggestion,
+        }))
+      )
+    )
+  }
+
+  const results = await Promise.all(insertPromises)
+  const error = results.find(r => r.error)
+  if (error) {
+    // Si algo falla, el plan ya se creó, pero lanzamos error para que el frontend sepa
+    return NextResponse.json({ error: 'Error al guardar relaciones o posts' }, { status: 500 })
+  }
 
   return NextResponse.json(mapContentPlan(plan), { status: 201 })
 }

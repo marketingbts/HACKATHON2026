@@ -20,6 +20,7 @@ import { SideNavBar } from '@/components/ui/SideNavBar'
 import { StepIndicator } from '@/components/ui/StepIndicator'
 import { Textarea } from '@/components/ui/Textarea'
 import { TopNavBar } from '@/components/ui/TopNavBar'
+import { ContentDetailModal } from '@/components/ui/ContentDetailModal'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -122,6 +123,8 @@ export default function UiKitPage() {
   const [multiValue, setMultiValue] = useState<string[]>([])
   const [goalValue, setGoalValue] = useState('')
   const [currentStep, setCurrentStep] = useState(1)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedContent, setSelectedContent] = useState<any>(null)
 
   return (
     <main className="min-h-screen bg-surface-background px-4 py-10 sm:px-8 sm:py-16">
@@ -380,12 +383,23 @@ export default function UiKitPage() {
               imageAlt="Pan artesanal recién horneado"
               date="Lunes 31 mar · 9:00 AM"
               dateTime="2025-03-31T09:00"
-              title="5 razones para empezar el día con pan de masa madre"
+              title="5 razones para empezar el día con pan de masa madre y descubrir los secretos de la fermentación natural en Marki"
               description="Un carrusel pensado para generar engagement y educar a tu audiencia sobre los beneficios del pan artesanal."
               socialNetwork="Instagram"
               format="Carrusel"
               recommended
-              onViewMore={() => {}}
+              onViewMore={() => {
+                setSelectedContent({
+                  image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
+                  imageAlt: "Pan artesanal recién horneado",
+                  date: "Lunes 31 mar · 9:00 AM",
+                  title: "5 razones para empezar el día con pan de masa madre y descubrir los secretos de la fermentación natural en Marki",
+                  description: "Un carrusel pensado para generar engagement y educar a tu audiencia sobre los beneficios del pan artesanal.\n\nContenido detallado para la audiencia seleccionada.",
+                  socialNetwork: "Instagram",
+                  format: "Carrusel"
+                })
+                setDetailModalOpen(true)
+              }}
               onEdit={() => {}}
             />
           </Row>
@@ -500,6 +514,31 @@ export default function UiKitPage() {
                 <CalendarRow date="Vie 8 Ago" time="9:00 AM" title="Detrás de escena: el proceso de amasado" contentType="Reel" socialNetwork="Instagram" />
               </CalendarList>
             </div>
+          </Row>
+        </Section>
+
+        {/* ── CONTENT DETAIL MODAL ── */}
+        <Section title="Content Detail Modal">
+          <Row label="ejemplo">
+            <Button variant="outline" onClick={() => {
+              setSelectedContent({
+                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
+                imageAlt: "Pan artesanal recién horneado",
+                date: "Lunes 31 mar · 9:00 AM",
+                title: "Título de Ejemplo para Modal",
+                description: "Esta es una descripción detallada que aparece dentro del modal cuando el usuario hace clic en 'Ver más'. Permite leer todo el contenido generado sin restricciones de espacio.",
+                socialNetwork: "Instagram",
+                format: "Carrusel"
+              })
+              setDetailModalOpen(true)
+            }}>
+              Abrir Modal de Detalle
+            </Button>
+            <ContentDetailModal 
+              isOpen={detailModalOpen} 
+              onClose={() => setDetailModalOpen(false)} 
+              content={selectedContent} 
+            />
           </Row>
         </Section>
 
