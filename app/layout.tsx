@@ -14,10 +14,16 @@ export const metadata: Metadata = {
   description: 'Generá estrategia de contenido profesional para redes sociales con IA',
 }
 
+import { Providers } from './providers'
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={inter.variable}>
-      <body>{children}</body>
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   )
 }
