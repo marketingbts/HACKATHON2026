@@ -214,7 +214,7 @@ export default function DashboardPage() {
           image: "https://placehold.co/600x400",
           imageAlt: "",
           date: selectedPost.date,
-          title: selectedPost.source === 'plan' ? `Plan: ${selectedPost.planName}` : 'Generación Rápida',
+          title: selectedPost.source === 'plan' ? `Plan: ${selectedPost.planName}` : selectedPost.planName,
           description: (selectedPost.copy || '') + (selectedPost.imageSuggestion ? `\n\nSugerencia IA: ${selectedPost.imageSuggestion}` : ''),
           socialNetwork: selectedPost.socialNetwork,
           format: selectedPost.type

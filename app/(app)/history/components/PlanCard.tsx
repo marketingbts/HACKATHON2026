@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { SocialIcon } from './SocialIcon'
 import type { ContentPlan } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, getPlanObjectiveLabel } from '@/lib/utils'
 
 type PlanCardProps = {
   plan: ContentPlan
@@ -49,7 +49,7 @@ export function PlanCard({ plan, networks, totalPosts, publishedPosts }: PlanCar
       </div>
 
       {/* Título */}
-      <h3 className="font-bold text-xl text-neutral-950 leading-snug">{plan.objective ?? 'Sin título'}</h3>
+      <h3 className="font-bold text-xl text-neutral-950 leading-snug">{getPlanObjectiveLabel(plan.objective)}</h3>
 
       {/* Fechas */}
       <div className="flex items-center gap-1.5 text-sm text-neutral-500">

@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { getPlanObjectiveLabel } from '@/lib/utils'
+
 export type SocialNetwork = 'Instagram' | 'Facebook' | 'TikTok' | 'WhatsApp'
 export type PostType = 'Historia' | 'Reel' | 'Post' | 'Carrusel'
 
@@ -102,7 +104,7 @@ export function mapCalendarResponseToUpcomingPosts(data: CalendarResponse): Upco
     date: formatLocalDay(entry.date ?? ''),
     isoDate: entry.date ?? '',
     time: undefined,
-    planName: entry.planObjective ?? 'Sin título',
+    planName: entry.source === 'plan' ? getPlanObjectiveLabel(entry.planObjective) : 'Generación Rápida',
     type: (entry.format ? entry.format.charAt(0).toUpperCase() + entry.format.slice(1) : 'Post') as PostType,
     socialNetwork: (entry.network ? entry.network.charAt(0).toUpperCase() + entry.network.slice(1) : 'Instagram') as SocialNetwork,
     copy: entry.copy ?? '',
