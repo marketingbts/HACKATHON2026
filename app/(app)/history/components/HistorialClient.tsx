@@ -110,7 +110,7 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
             {plans.length === 0 ? (
               <div className="border border-border-subtle rounded-2xl p-10 text-center text-neutral-400 text-sm">
                 Todavía no creaste ningún plan.{' '}
-                <Link href="/plans/new" className="text-brand font-semibold hover:underline">
+                <Link href="/plans" className="text-brand font-semibold hover:underline">
                   Crear uno
                 </Link>
               </div>

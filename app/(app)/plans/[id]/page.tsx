@@ -15,8 +15,8 @@ export default async function PlanDetailPage({ params }: { params: { id: string 
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <Link href="/plans" className="text-sm text-gray-500 hover:underline">
-          ← Mis planes
+        <Link href="/history" className="text-sm text-gray-500 hover:underline">
+          ← Mi historial
         </Link>
       </div>
 
