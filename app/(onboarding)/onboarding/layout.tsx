@@ -1,16 +1,18 @@
 import { redirect } from 'next/navigation'
-import { headers, cookies } from 'next/headers'
+import { getSession } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
-  const cookieHeader = cookies().toString()
-  const host = headers().get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+  const session = await getSession()
+  if (!session) redirect('/login')
 
-  const res = await fetch(`${protocol}://${host}/api/business`, {
-    headers: { cookie: cookieHeader },
-  })
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('user_id', session.userId)
+    .maybeSingle()
 
-  if (res.ok) redirect('/dashboard')
+  if (business) redirect('/dashboard')
 
   return (
     <div className="min-h-screen bg-surface-muted flex flex-col">

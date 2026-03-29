@@ -1,20 +1,19 @@
 import { redirect } from 'next/navigation'
-import { headers, cookies } from 'next/headers'
+import { getSession } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 import { AppShell } from './components/AppShell'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const cookieHeader = cookies().toString()
-  const host = headers().get('host') ?? 'localhost:3000'
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+  const session = await getSession()
+  if (!session) redirect('/login')
 
-  const res = await fetch(`${protocol}://${host}/api/business`, {
-    headers: { cookie: cookieHeader },
-  })
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('name')
+    .eq('user_id', session.userId)
+    .maybeSingle()
 
-  if (res.status === 401) redirect('/login')
-  if (res.status === 404) redirect('/onboarding')
-
-  const business = await res.json()
+  if (!business) redirect('/onboarding')
 
   return <AppShell brandName={business.name}>{children}</AppShell>
 }
