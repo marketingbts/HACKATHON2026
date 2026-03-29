@@ -221,6 +221,8 @@ export interface BuildPlanPromptParams extends BusinessContext {
   tone: string
   period: 'day' | 'week' | 'month'
   detail?: string
+  feedback?: string
+  previousPlan?: object
 }
 
 // ─── Zustand stores ───────────────────────────────────────────────────────────

@@ -52,7 +52,7 @@ const NAV_ITEMS = [
   { id: 'dashboard',    label: 'Dashboard',          href: '/dashboard',  icon: <DashboardIcon /> },
   { id: 'fast-create',  label: 'Generación Rápida',  href: '/generate',   icon: <BoltIcon /> },
   { id: 'content-plan', label: 'Plan de Contenido',  href: '/plans/new',  icon: <CalendarIcon /> },
-  { id: 'my-plans',     label: 'Mis Planes',         href: '/calendar',   icon: <ListIcon /> },
+  { id: 'my-plans',     label: 'Mis Planes',         href: '/history',  icon: <ListIcon /> },
 ] as const
 
 export function SideNavBar() {
