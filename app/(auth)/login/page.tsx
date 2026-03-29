@@ -30,7 +30,7 @@ export default function LoginPage() {
       </form>
       <p className="text-center text-sm mt-4">
         ¿No tenés cuenta?{' '}
-        <Link href="/registro" className="underline">
+        <Link href="/register" className="underline">
           Registrate
         </Link>
       </p>

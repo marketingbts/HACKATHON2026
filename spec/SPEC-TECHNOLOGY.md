@@ -281,7 +281,7 @@ El contexto del negocio se inyecta en todas las llamadas para que la IA siempre 
 
 - **Proveedor:** Supabase Auth
 - **Método:** Email + contraseña
-- **Middleware:** `middleware.ts` en la raíz del proyecto protege todas las rutas excepto `/login` y `/registro`
+- **Middleware:** `middleware.ts` en la raíz del proyecto protege todas las rutas excepto `/login` y `/register`
 - **Sesión:** manejada por Supabase con cookies httpOnly
 
 ### 6.2 Desarrollo — Skip de Auth
@@ -328,7 +328,7 @@ shadcn/ui se usa para componentes complejos que serían costosos de construir de
 ├── app/
 │   ├── (auth)/
 │   │   ├── login/
-│   │   └── registro/
+│   │   └── register/
 │   ├── (app)/
 │   │   ├── dashboard/
 │   │   ├── onboarding/
