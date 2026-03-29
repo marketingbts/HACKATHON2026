@@ -5,17 +5,19 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { PlanCard } from './PlanCard'
 import { PastPublicationsTable } from './PastPublicationsTable'
-import type { ContentPlan, CalendarEntry } from '@/lib/types'
+import { QuickGenerationsTable } from './QuickGenerationsTable'
+import type { ContentPlan, CalendarEntry, QuickGeneration } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 type HistorialClientProps = {
   plans: ContentPlan[]
   calendarEntries: CalendarEntry[]
+  quickGenerations: QuickGeneration[]
 }
 
 const today = new Date().toISOString().split('T')[0]
 
-export function HistorialClient({ plans, calendarEntries }: HistorialClientProps) {
+export function HistorialClient({ plans, calendarEntries, quickGenerations }: HistorialClientProps) {
   const [activeTab, setActiveTab] = useState<'planes' | 'generaciones'>('planes')
 
   const activePlansCount = plans.filter((p) => p.status === 'active').length
@@ -23,7 +25,7 @@ export function HistorialClient({ plans, calendarEntries }: HistorialClientProps
   // Derivar redes y progreso por plan desde el calendario
   function getPlanMeta(planId: string) {
     const entries = calendarEntries.filter((e) => e.planId === planId)
-    const networks = [...new Set(entries.map((e) => e.network).filter(Boolean))] as string[]
+    const networks = Array.from(new Set(entries.map((e) => e.network).filter(Boolean))) as string[]
     const totalPosts = entries.length
     const publishedPosts = entries.filter((e) => e.date && e.date <= today).length
     return { networks, totalPosts, publishedPosts }
@@ -145,11 +147,14 @@ export function HistorialClient({ plans, calendarEntries }: HistorialClientProps
 
       {/* Tab: Generaciones Rápidas */}
       {activeTab === 'generaciones' && (
-        <div className="border border-border-subtle rounded-2xl p-10 text-center text-neutral-400 text-sm">
-          <svg className="w-10 h-10 mx-auto mb-3 text-indigo-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-          </svg>
-          <p>El historial de generaciones rápidas estará disponible próximamente.</p>
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-neutral-950">Generaciones Rápidas</h2>
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+              Total: {quickGenerations.length}
+            </span>
+          </div>
+          <QuickGenerationsTable generations={quickGenerations} />
         </div>
       )}
     </div>
