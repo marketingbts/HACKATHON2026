@@ -28,7 +28,7 @@ export function AppShell({ brandName, children }: AppShellProps) {
 
       <div className="flex-1 flex flex-col pl-60">
         <TopNavBar greeting={greeting} initials={initials} />
-        <main className="px-4 sm:px-6 lg:px-10 pt-[80px] pb-16">
+        <main className="flex-1 bg-[var(--color-surface-main-background)] px-4 sm:px-6 lg:px-10 pt-[80px] pb-16">
           {children}
         </main>
       </div>

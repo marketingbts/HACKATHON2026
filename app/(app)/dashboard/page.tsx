@@ -101,7 +101,7 @@ export default function DashboardPage() {
             description="Accede a tus borradores y planes de contenido anteriores."
             ctaLabel="Ir a archivos"
             icon={<FolderOpenOutlinedIcon className="w-5 h-5 text-neutral-550" />}
-            onCtaClick={() => router.push('/calendar')}
+            onCtaClick={() => router.push('/history')}
           />
         </div>
       </section>

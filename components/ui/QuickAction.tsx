@@ -61,6 +61,7 @@ export function QuickAction({
 
   return (
     <article
+      onClick={onCtaClick}
       className={cn(
         'group flex w-full flex-col items-start rounded-lg',
         'border border-border-muted bg-surface-background',

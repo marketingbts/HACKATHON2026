@@ -1,15 +1,14 @@
 'use client'
 
 import { Modal } from './Modal'
-import { Badge } from './Badge'
 import { cn } from '@/lib/utils'
 
 type ContentDetailModalProps = {
   isOpen: boolean
   onClose: () => void
   content: {
-    image: string
-    imageAlt: string
+    image?: string
+    imageAlt?: string
     date: string
     title: string
     description: string
@@ -29,26 +28,21 @@ export function ContentDetailModal({ isOpen, onClose, content }: ContentDetailMo
       className="max-w-2xl"
     >
       <div className="flex flex-col gap-6">
-        {/* Portada */}
-        <div className="relative h-64 w-full overflow-hidden rounded-xl border border-border-subtle">
-          <img
-            src={content.image}
-            alt={content.imageAlt}
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute left-4 top-4 flex items-center gap-2">
+        {/* Badges */}
+        {(content.socialNetwork || content.format) && (
+          <div className="flex items-center gap-2">
             {content.socialNetwork && (
-              <span className="bg-utility-overlay-light backdrop-blur-md px-3 py-1 rounded-full font-bold text-[10px] text-brand-700 uppercase shadow-sm">
+              <span className="px-3 py-1 rounded-full font-bold text-[10px] text-brand-700 bg-brand-50 uppercase shadow-sm">
                 {content.socialNetwork}
               </span>
             )}
             {content.format && (
-              <span className="bg-brand-600 backdrop-blur-md px-3 py-1 rounded-full font-bold text-[10px] text-surface-background uppercase shadow-sm">
+              <span className="bg-brand-600 px-3 py-1 rounded-full font-bold text-[10px] text-surface-background uppercase shadow-sm">
                 {content.format}
               </span>
             )}
           </div>
-        </div>
+        )}
 
         {/* Info */}
         <div className="flex flex-col gap-4">
