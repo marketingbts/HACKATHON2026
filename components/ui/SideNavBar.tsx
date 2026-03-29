@@ -49,10 +49,10 @@ function ListIcon() {
 }
 
 const NAV_ITEMS = [
-  { id: 'dashboard',    label: 'Dashboard',          href: '/dashboard',  icon: <DashboardIcon /> },
-  { id: 'fast-create',  label: 'Generación Rápida',  href: '/generate',   icon: <BoltIcon /> },
-  { id: 'content-plan', label: 'Plan de Contenido',  href: '/plans/new',  icon: <CalendarIcon /> },
-  { id: 'my-plans',     label: 'Mis Planes',         href: '/history',  icon: <ListIcon /> },
+  { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: <DashboardIcon /> },
+  { id: 'fast-create', label: 'Generación Rápida', href: '/generate', icon: <BoltIcon /> },
+  { id: 'content-plan', label: 'Plan de Contenido', href: '/plans/new', icon: <CalendarIcon /> },
+  { id: 'my-plans', label: 'Mi historial', href: '/history', icon: <ListIcon /> },
 ] as const
 
 export function SideNavBar() {
@@ -66,7 +66,7 @@ export function SideNavBar() {
           Marki
         </span>
         <span className="font-medium text-[10px] text-neutral-400 tracking-[2px] uppercase leading-snug">
-          Content Strategy
+          Tu CM amigo
         </span>
       </div>
 

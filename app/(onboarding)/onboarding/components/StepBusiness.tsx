@@ -60,7 +60,7 @@ export function StepBusiness({ data, errors, onChange, onNext }: StepBusinessPro
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center mb-2">
-        <p className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-2">Paso 1 de 3</p>
+        <p className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-2">Paso 1 de 3</p>
         <h2 className="text-2xl font-bold text-gray-900">¿Quién sos?</h2>
         <p className="text-gray-500 text-sm mt-1">Contanos sobre tu negocio para personalizar el contenido.</p>
       </div>
@@ -88,7 +88,7 @@ export function StepBusiness({ data, errors, onChange, onNext }: StepBusinessPro
       <Textarea
         id="business-description"
         label="Descripción breve"
-        placeholder="Contanós que hace que tu negocio sea especial..."
+        placeholder="Contanos que hace que tu negocio sea especial..."
         rows={3}
         value={data.description}
         onChange={(e) => onChange({ ...data, description: e.target.value })}

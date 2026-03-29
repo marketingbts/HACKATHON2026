@@ -88,7 +88,7 @@ export default function DashboardPage() {
           />
           <QuickAction
             variant="view-plans"
-            title="Mis Planes"
+            title="Mi historial"
             description="Accede a tus borradores y planes de contenido anteriores."
             ctaLabel="Ir a archivos"
             icon={<FolderOpenOutlinedIcon className="w-5 h-5 text-neutral-550" />}
