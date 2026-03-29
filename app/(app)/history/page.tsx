@@ -15,7 +15,7 @@ export default async function HistorialPage() {
   ])
 
   const plans: ContentPlan[] = plansRes.ok ? await plansRes.json() : []
-  const calendarData = calendarRes.ok ? await calendarRes.json() : { entries: [] }
+  const calendarData = calendarRes.ok ? await calendarRes.json() : { entries: [], planEntries: [], quickEntries: [] }
   const calendarEntries: CalendarEntry[] = calendarData.entries ?? []
   const quickGenerations: QuickGeneration[] = quickRes.ok ? await quickRes.json() : []
 

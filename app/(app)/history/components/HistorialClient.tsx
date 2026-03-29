@@ -102,9 +102,6 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
                   </span>
                 )}
               </div>
-              <Link href="/calendar">
-                <Button variant="secondary">VER CALENDARIO</Button>
-              </Link>
             </div>
 
             {plans.length === 0 ? (
@@ -115,7 +112,7 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {plans.map((plan) => {
                   const { networks, totalPosts, publishedPosts } = getPlanMeta(plan.id)
                   return (
@@ -125,6 +122,7 @@ export function HistorialClient({ plans, calendarEntries, quickGenerations }: Hi
                       networks={networks}
                       totalPosts={totalPosts}
                       publishedPosts={publishedPosts}
+                      calendarEntries={calendarEntries}
                     />
                   )
                 })}

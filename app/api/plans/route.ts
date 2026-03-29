@@ -18,6 +18,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
 
+  const today = new Date().toISOString().split('T')[0]
+
+  // 1. Auto-archivar planes vencidos antes de consultar
+  await supabase
+    .from('content_plans')
+    .update({ status: 'archived' })
+    .eq('business_id', business.id)
+    .eq('status', 'active')
+    .lt('period_end', today)
+
+  // 2. Consultar los planes
   let query = supabase
     .from('content_plans')
     .select('*')
