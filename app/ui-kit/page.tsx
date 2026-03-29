@@ -127,7 +127,7 @@ export default function UiKitPage() {
   const [selectedContent, setSelectedContent] = useState<any>(null)
 
   return (
-    <main className="min-h-screen bg-surface-background px-4 py-10 sm:px-8 sm:py-16">
+    <main className="min-h-screen bg-[#faf4f7] px-4 py-10 sm:px-8 sm:py-16">
       <div className="mx-auto flex max-w-2xl flex-col gap-12">
 
         {/* Header */}
@@ -265,8 +265,8 @@ export default function UiKitPage() {
             <Badge label="Carrusel" />
           </Row>
           <Row label="closeable=true">
-            <Badge label="Reel" closeable onClose={() => {}} />
-            <Badge label="Historia" closeable onClose={() => {}} />
+            <Badge label="Reel" closeable onClose={() => { }} />
+            <Badge label="Historia" closeable onClose={() => { }} />
           </Row>
         </Section>
 
@@ -379,19 +379,16 @@ export default function UiKitPage() {
         <Section title="Content Card">
           <Row label="completa (con recomendado)">
             <ContentCard
-              image="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop"
-              imageAlt="Pan artesanal recién horneado"
+              copy="5 razones para empezar el día con pan de masa madre y descubrir los secretos de la fermentación natural en Marki"
+              description="Un carrusel pensado para generar engagement y educar a tu audiencia sobre los beneficios del pan artesanal."
               date="Lunes 31 mar · 9:00 AM"
               dateTime="2025-03-31T09:00"
               title="5 razones para empezar el día con pan de masa madre y descubrir los secretos de la fermentación natural en Marki"
-              description="Un carrusel pensado para generar engagement y educar a tu audiencia sobre los beneficios del pan artesanal."
               socialNetwork="Instagram"
               format="Carrusel"
               recommended
               onViewMore={() => {
                 setSelectedContent({
-                  image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
-                  imageAlt: "Pan artesanal recién horneado",
                   date: "Lunes 31 mar · 9:00 AM",
                   title: "5 razones para empezar el día con pan de masa madre y descubrir los secretos de la fermentación natural en Marki",
                   description: "Un carrusel pensado para generar engagement y educar a tu audiencia sobre los beneficios del pan artesanal.\n\nContenido detallado para la audiencia seleccionada.",
@@ -400,19 +397,18 @@ export default function UiKitPage() {
                 })
                 setDetailModalOpen(true)
               }}
-              onEdit={() => {}}
+              onEdit={() => { }}
             />
           </Row>
           <Row label="sin imagen de overlay ni recomendado">
             <ContentCard
-              image="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=200&fit=crop"
-              imageAlt="Croissants en bandeja"
+              copy="Croissants hojaldrados recien salidos del horno cada manana"
+              description="Post educativo sobre el proceso artesanal, ideal para posicionar la marca."
               date="Miércoles 2 abr · 12:00 PM"
               dateTime="2025-04-02T12:00"
               title="¿Sabés qué tiene de especial nuestra harina?"
-              description="Post educativo sobre el proceso artesanal, ideal para posicionar la marca."
-              onViewMore={() => {}}
-              onEdit={() => {}}
+              onViewMore={() => { }}
+              onEdit={() => { }}
             />
           </Row>
         </Section>
@@ -424,17 +420,17 @@ export default function UiKitPage() {
               content={`🥐 Cada mañana, antes de que el barrio despierte, nuestras manos ya están en la masa.\n\nPan de masa madre, croissants hojaldrados y medialunas que salen del horno a las 6AM — para que vos empieces el día como te merecés.\n\n#PanArtesanal #MasaMadre #Panadería`}
               imageHint="Sugerencia IA: usá una foto cálida del horno o de tus manos amasando — genera más conexión emocional."
               recommended
-              onRegenerate={() => {}}
-              onCopy={() => {}}
-              onSave={() => {}}
+              onRegenerate={() => { }}
+              onCopy={() => { }}
+              onSave={() => { }}
             />
           </Row>
           <Row label="sin imageHint ni recomendado">
             <GeneratedContentCard
               content={`¿Conocés la diferencia entre el pan común y el pan de masa madre?\n\nNuestro fermento tiene más de 2 años de vida. Eso se nota en el sabor, la textura y en cómo te hace sentir.\n\n👇 Guardá este post para compartirlo.`}
-              onRegenerate={() => {}}
-              onCopy={() => {}}
-              onSave={() => {}}
+              onRegenerate={() => { }}
+              onCopy={() => { }}
+              onSave={() => { }}
             />
           </Row>
         </Section>
@@ -522,8 +518,6 @@ export default function UiKitPage() {
           <Row label="ejemplo">
             <Button variant="outline" onClick={() => {
               setSelectedContent({
-                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
-                imageAlt: "Pan artesanal recién horneado",
                 date: "Lunes 31 mar · 9:00 AM",
                 title: "Título de Ejemplo para Modal",
                 description: "Esta es una descripción detallada que aparece dentro del modal cuando el usuario hace clic en 'Ver más'. Permite leer todo el contenido generado sin restricciones de espacio.",
@@ -534,10 +528,10 @@ export default function UiKitPage() {
             }}>
               Abrir Modal de Detalle
             </Button>
-            <ContentDetailModal 
-              isOpen={detailModalOpen} 
-              onClose={() => setDetailModalOpen(false)} 
-              content={selectedContent} 
+            <ContentDetailModal
+              isOpen={detailModalOpen}
+              onClose={() => setDetailModalOpen(false)}
+              content={selectedContent}
             />
           </Row>
         </Section>
@@ -549,7 +543,7 @@ export default function UiKitPage() {
               title="No tenés planes todavía"
               description="Empezá creando tu primer plan de contenido con IA."
               ctaLabel="Crear plan"
-              onCta={() => {}}
+              onCta={() => { }}
             />
           </Row>
           <Row label="sin CTA">
