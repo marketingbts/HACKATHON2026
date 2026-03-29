@@ -40,6 +40,7 @@ export function useSaveQuick() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quick-generations'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar'] })
     }
   })
 }

@@ -81,6 +81,7 @@ export function useOnboardingSubmit() {
     mutationFn: submitOnboarding,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar'] })
       router.push('/dashboard')
     },
   })

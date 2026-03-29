@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
 import { supabase } from '@/lib/supabase'
 import { getSession } from '@/lib/auth'
 import { mapContentPlan } from '@/lib/mappers'
