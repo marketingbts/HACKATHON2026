@@ -51,9 +51,9 @@ function ListIcon() {
 
 const NAV_ITEMS = [
   { id: 'dashboard',    label: 'Dashboard',          href: '/dashboard',      icon: <DashboardIcon /> },
-  { id: 'fast-create',  label: 'Generación Rápida',  href: '/fast-create',    icon: <BoltIcon /> },
-  { id: 'content-plan', label: 'Plan de Contenido',  href: '/content-plan',   icon: <CalendarIcon /> },
-  { id: 'my-plans',     label: 'Mis Planes',          href: '/my-plans',       icon: <ListIcon /> },
+  { id: 'fast-create',  label: 'Generación Rápida',  href: '/generate',       icon: <BoltIcon /> },
+  { id: 'content-plan', label: 'Plan de Contenido',  href: '/plans',          icon: <CalendarIcon /> },
+  { id: 'my-plans',     label: 'Mis Planes',         href: '/calendar',       icon: <ListIcon /> },
 ] as const
 
 export function SideNavBar({ activeItem }: SideNavBarProps) {
