@@ -26,6 +26,8 @@ export function useUpdateBusiness() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['audiences'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
     },
   })
 }
@@ -44,6 +46,7 @@ export function useAddAudience() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['audiences'] })
     },
   })
 }
@@ -57,6 +60,7 @@ export function useDeleteAudience() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['audiences'] })
     },
   })
 }
@@ -75,6 +79,7 @@ export function useAddProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
     },
   })
 }
@@ -88,6 +93,7 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
     },
   })
 }

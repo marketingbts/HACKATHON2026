@@ -40,6 +40,7 @@ export function useSavePlan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar'] })
     }
   })
 }
@@ -73,6 +74,7 @@ export function useUpdatePlan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans'] })
+      queryClient.invalidateQueries({ queryKey: ['calendar'] })
     }
   })
 }
