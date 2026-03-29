@@ -55,7 +55,11 @@ const NAV_ITEMS = [
   { id: 'my-plans', label: 'Mi historial', href: '/history', icon: <ListIcon /> },
 ] as const
 
-export function SideNavBar() {
+type SideNavBarProps = {
+  activeId?: (typeof NAV_ITEMS)[number]['id']
+}
+
+export function SideNavBar({ activeId }: SideNavBarProps) {
   const pathname = usePathname()
 
   return (
@@ -73,8 +77,9 @@ export function SideNavBar() {
       {/* Nav links */}
       <nav className="px-4 flex flex-col gap-2" aria-label="Navegación principal">
         {NAV_ITEMS.map((item) => {
-          const active =
-            item.href === '/dashboard'
+          const active = activeId
+            ? item.id === activeId
+            : item.href === '/dashboard'
               ? pathname === '/dashboard'
               : pathname.startsWith(item.href)
           return (

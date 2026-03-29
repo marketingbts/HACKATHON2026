@@ -472,9 +472,9 @@ export default function UiKitPage() {
         {/* ── SIDE NAV BAR ── */}
         <Section title="Side Nav Bar">
           <Row label="con activeItem=fast-create">
-            <div className="relative h-64 w-60 overflow-hidden rounded-lg border border-border-light">
+            <div className="relative h-64 w-60 overflow-hidden rounded-lg border border-border-light"> 
               <div className="absolute inset-0 overflow-hidden">
-                <SideNavBar activeItem="fast-create" />
+                <SideNavBar activeId="fast-create" />
               </div>
             </div>
           </Row>
