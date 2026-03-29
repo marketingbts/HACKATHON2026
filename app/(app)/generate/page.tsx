@@ -10,32 +10,32 @@ import { Multiselect } from '@/components/ui/Multiselect'
 
 const FORMATS = ['post', 'reel', 'carrusel', 'historia']
 
-  const GOAL_OPTIONS = [
-    {
-      value: 'promote_offer',
-      title: 'Vender más',
-      description: 'Enfocado en conversión y CTA claro.',
-      icon: (
-        <img src="/assets/icons/cart-green.svg" />
-      ),
-    },
-    {
-      value: 'gain_followers',
-      title: 'Informar o educar',
-      description: 'Contenido de valor para tu audiencia.',
-      icon: (
-        <img src="/assets/icons/hat-purple.svg" alt="" />
-      ),
-    },
-    {
-      value: 'increase_engagement',
-      title: 'Conectar',
-      description: 'Humanizar la marca y generar empatía.',
-      icon: (
-        <img src="/assets/icons/heart-pink.svg" alt="" />
-      ),
-    },
-  ]
+const GOAL_OPTIONS = [
+  {
+    value: 'promote_offer',
+    title: 'Vender más',
+    description: 'Enfocado en conversión y CTA claro.',
+    icon: (
+      <img src="/assets/icons/cart-green.svg" />
+    ),
+  },
+  {
+    value: 'gain_followers',
+    title: 'Informar o educar',
+    description: 'Contenido de valor para tu audiencia.',
+    icon: (
+      <img src="/assets/icons/hat-purple.svg" alt="" />
+    ),
+  },
+  {
+    value: 'increase_engagement',
+    title: 'Conectar',
+    description: 'Humanizar la marca y generar empatía.',
+    icon: (
+      <img src="/assets/icons/heart-pink.svg" alt="" />
+    ),
+  },
+]
 
 export default function GeneratePage() {
   const [format, setFormat] = useState('post')
@@ -155,8 +155,8 @@ export default function GeneratePage() {
         </div>
         <div className="flex flex-col gap-2">
           <Button variant="primary" onClick={handleGenerate} disabled={loading}>
-              {loading ? 'Generando tu contenido...' : '✦ Generar contenido'}
-            </Button>
+            {loading ? 'Generando tu contenido...' : '✦ Generar contenido'}
+          </Button>
         </div>
       </div>
 

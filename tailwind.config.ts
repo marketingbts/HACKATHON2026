@@ -14,6 +14,7 @@ const config: Config = {
       colors: {
         brand: {
           DEFAULT:  'var(--color-brand-primary-default)',
+          200:      'var(--color-brand-primary-200)',
           300:      'var(--color-brand-primary-300)',
           350:      'var(--color-brand-primary-350)',
           400:      'var(--color-brand-primary-400)',
@@ -31,6 +32,7 @@ const config: Config = {
           light:            'var(--color-surface-light)',
           input:            'var(--color-surface-input)',
           elevated:         'var(--color-surface-elevated)',
+          'elevated-alt':   'var(--color-surface-elevated-alt)',
           'primary-subtle': 'var(--color-surface-primary-subtle)',
           'primary-light':  'var(--color-surface-primary-light)',
           'primary-wash':   'var(--color-surface-primary-wash)',
@@ -41,6 +43,7 @@ const config: Config = {
         },
         'neutral-ui': {
           label:           'var(--color-neutral-ui-label)',
+          subtitle:        'var(--color-neutral-ui-subtitle)',
           placeholder:     'var(--color-neutral-ui-placeholder)',
           muted:           'var(--color-neutral-ui-muted)',
           dark:            'var(--color-neutral-ui-dark)',

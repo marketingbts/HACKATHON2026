@@ -15,10 +15,10 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
                 isCompleted
-                  ? 'bg-green-500 text-white'
+                  ? 'bg-semantic-success-alt text-white'
                   : isActive
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-indigo-100 text-indigo-300'
+                  ? 'bg-brand text-white'
+                  : 'bg-surface-primary-wash text-brand-350'
               }`}
             >
               {isCompleted ? (
@@ -30,7 +30,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
               )}
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-12 h-0.5 ${i < currentStep ? 'bg-green-400' : 'bg-indigo-100'}`} />
+              <div className={`w-12 h-0.5 ${i < currentStep ? 'bg-semantic-success-alt' : 'bg-surface-primary-wash'}`} />
             )}
           </div>
         )

@@ -132,9 +132,9 @@ export function GeneratedContentCard({
           onClick={() => onSave?.(editableContent)}
           className={cn(
             'flex items-center justify-center rounded-md px-3 py-2',
-            'bg-gradient-to-r from-[#4648d4] to-[#6063ee]',
+            'bg-brand hover:brightness-110 shadow-sm',
             'font-semibold text-2xs text-surface-background',
-            'transition-all duration-150 hover:brightness-110 active:brightness-95',
+            'transition-all duration-150 active:brightness-95',
           )}
         >
           Guardar

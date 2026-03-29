@@ -83,7 +83,7 @@ export function HeroCard({
     <section
       className={cn(
         'relative flex overflow-hidden rounded-lg',
-        'bg-gradient-to-br from-[#4648d4] to-[#4338ca]',
+        'bg-brand',
         // Mobile: column | Tablet: still column, card more compact | Desktop: row
         'flex-col lg:flex-row',
         'p-6 sm:p-8 lg:p-10',

@@ -40,7 +40,7 @@ export function StepAudiences({ audiences, onAddAudience, onRemoveAudience, onBa
 
   const header = (
     <div className="text-center mb-5">
-      <p className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-2">Paso 2 de 3</p>
+      <p className="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-2">Paso 2 de 3</p>
       <h2 className="text-2xl font-bold text-gray-900">¿A quién le hablás?</h2>
       <p className="text-gray-500 text-sm mt-1">Podés definir varios perfiles de audiencia para tu marca.</p>
     </div>
@@ -91,9 +91,9 @@ export function StepAudiences({ audiences, onAddAudience, onRemoveAudience, onBa
         <div className="flex flex-col gap-2">
           {audiences.map((a, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="flex-1 flex items-center justify-between bg-indigo-50 rounded-xl px-4 py-3">
+              <div className="flex-1 flex items-center justify-between bg-surface-primary-subtle rounded-xl px-4 py-3">
                 <span className="text-sm font-medium text-gray-800 truncate">{a.name}</span>
-                <svg className="w-4 h-4 text-indigo-400 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-brand-400 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -112,7 +112,7 @@ export function StepAudiences({ audiences, onAddAudience, onRemoveAudience, onBa
         {audiences.length < 5 && (
           <button
             onClick={handleAddAnother}
-            className="w-full mt-3 border-2 border-dashed border-indigo-200 hover:border-indigo-400 text-indigo-500 hover:text-indigo-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+            className="w-full mt-3 border-2 border-dashed border-border-primary hover:border-brand-400 text-brand-500 hover:text-brand-700 rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />

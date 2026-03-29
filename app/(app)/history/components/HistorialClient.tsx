@@ -23,7 +23,7 @@ export function HistorialClient({ plans, calendarEntries }: HistorialClientProps
   // Derivar redes y progreso por plan desde el calendario
   function getPlanMeta(planId: string) {
     const entries = calendarEntries.filter((e) => e.planId === planId)
-    const networks = [...new Set(entries.map((e) => e.network).filter(Boolean))] as string[]
+    const networks = Array.from(new Set(entries.map((e) => e.network).filter(Boolean))) as string[]
     const totalPosts = entries.length
     const publishedPosts = entries.filter((e) => e.date && e.date <= today).length
     return { networks, totalPosts, publishedPosts }
