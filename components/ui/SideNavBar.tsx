@@ -52,7 +52,7 @@ function ListIcon() {
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: <DashboardIcon /> },
   { id: 'fast-create', label: 'Generación Rápida', href: '/generate', icon: <BoltIcon /> },
-  { id: 'content-plan', label: 'Plan de Contenido', href: '/plans', icon: <CalendarIcon /> },
+  { id: 'content-plan', label: 'Planificador', href: '/plans', icon: <CalendarIcon /> },
   { id: 'my-plans', label: 'Mi historial', href: '/history', icon: <ListIcon /> },
 ] as const
 

@@ -101,6 +101,7 @@ export function GeneratedContentCard({
         <button
           type="button"
           aria-label="Regenerar contenido"
+          title="Regenerar contenido"
           onClick={onRegenerate}
           className={cn(
             'flex items-center gap-[5px] rounded-md px-3 py-2',
@@ -115,6 +116,7 @@ export function GeneratedContentCard({
         <button
           type="button"
           aria-label="Copiar texto al portapapeles"
+          title="Copiar al portapapeles"
           onClick={() => onCopy?.(editableContent)}
           className={cn(
             'flex items-center gap-[5px] rounded-md px-3 py-2',
@@ -129,6 +131,7 @@ export function GeneratedContentCard({
         <button
           type="button"
           aria-label="Guardar contenido"
+          title="Guardar contenido"
           onClick={() => onSave?.(editableContent)}
           className={cn(
             'flex items-center justify-center rounded-md px-3 py-2',

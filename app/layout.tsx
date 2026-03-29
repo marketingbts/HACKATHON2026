@@ -12,6 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Marki — Contenido para tu negocio',
   description: 'Generá estrategia de contenido profesional para redes sociales con IA',
+  icons: {
+    icon: '/assets/icons/marki/marki-icon.png',
+    apple: '/assets/icons/marki/marki-icon.png',
+  },
 }
 
 import { Providers } from './providers'

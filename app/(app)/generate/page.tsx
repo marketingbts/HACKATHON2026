@@ -12,9 +12,10 @@ import { ProductModal } from '@/components/ui/ProductModal'
 import { AudienceModal } from '@/components/ui/AudienceModal'
 import { useAudiences, useProducts } from '@/lib/hooks/use-business'
 import { useGenerateQuick, useSaveQuick } from '@/lib/hooks/use-quick-gen'
+import { toast } from 'sonner'
 
 const FORMAT_OPTIONS = [
-  { value: 'post', label: 'Post' },
+  { value: 'post', label: 'Publicación' },
   { value: 'reel', label: 'Reel' },
   { value: 'carrusel', label: 'Carrusel' },
   { value: 'historia', label: 'Historia' },
@@ -97,6 +98,7 @@ export default function GeneratePage() {
       productId: selectedProductIds[0],
       audienceName: audiencesList.find(a => a.id === selectedAudienceIds[0])?.name
     })
+    toast.success('Contenido guardado exitosamente')
     router.push('/dashboard')
   }
 
@@ -218,7 +220,7 @@ export default function GeneratePage() {
                 onRegenerate={handleGenerate}
                 onCopy={(text) => {
                   if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text)
+                    navigator.clipboard.writeText(text).then(() => toast.success('Copiado al portapapeles'))
                   } else {
                     const textArea = document.createElement("textarea");
                     textArea.value = text;
@@ -230,6 +232,7 @@ export default function GeneratePage() {
                     textArea.select();
                     try {
                       document.execCommand('copy');
+                      toast.success('Copiado al portapapeles')
                     } catch (err) {
                       console.error('Error al copiar: ', err);
                     }

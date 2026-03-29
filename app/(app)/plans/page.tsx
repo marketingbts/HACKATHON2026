@@ -15,11 +15,12 @@ import { ContentDetailModal } from '@/components/ui/ContentDetailModal'
 import { ContentEditModal } from '@/components/ui/ContentEditModal'
 import { useAudiences, useProducts } from '@/lib/hooks/use-business'
 import { useGeneratePlan, useSavePlan } from '@/lib/hooks/use-plans'
+import { toast } from 'sonner'
 import type { GeneratePlanResponse } from '@/lib/types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const POST_TYPE_LABEL: Record<string, string> = {
-  post: 'Post', reel: 'Reel', story: 'Historia', carousel: 'Carrusel',
+  post: 'Publicación', reel: 'Reel', story: 'Historia', carousel: 'Carrusel',
 }
 function formatDate(day: string): string {
   return new Date(day + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
@@ -159,6 +160,7 @@ export default function PlansPage() {
         }
       }),
     })
+    toast.success('Plan guardado exitosamente')
     router.push('/history')
   }
 
