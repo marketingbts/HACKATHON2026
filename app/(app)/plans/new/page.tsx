@@ -1,28 +1,61 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { GeneratePlanResponse, AIPlanPost, AIVariant } from '@/lib/types'
+import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
+import { GoalOption } from '@/components/ui/GoalOption'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
-const OBJECTIVES = [
-  'Lanzar un producto nuevo',
-  'Ganar seguidores',
-  'Aumentar comentarios e interacción',
-  'Promocionar una oferta',
-  'Fidelizar clientes existentes',
+const TONE_OPTIONS = [
+  { value: 'formal', label: 'Formal' },
+  { value: 'informal', label: 'Informal' },
+  { value: 'cercano', label: 'Cercano' },
+  { value: 'profesional', label: 'Profesional' },
 ]
 
-const TONES = ['Formal', 'Informal', 'Cercano', 'Profesional']
-const PERIODS = ['daily', 'weekly', 'monthly']
-const PRODUCTS_MOCK = [
-      "Viandas semanales",
-      "Plan mensual",
-      "Plan vegetariano",
-      "Envío a domicilio"
-    ]
-const AUDIENCE_MOCK = [
-  "Mamás del barrio"
+const PERIOD_OPTIONS = [
+  { value: 'day', label: 'Un día' },
+  { value: 'week', label: 'Una semana' },
+  { value: 'month', label: 'Un mes' },
+  { value: 'profesional', label: 'Profesional' },
 ]
+
+const GOAL_OPTIONS = [
+  {
+    value: 'promote_offer',
+    title: 'Vender más',
+    description: 'Enfocado en conversión y CTA claro.',
+    icon: (
+      <img src="/assets/icons/cart-green.svg" />
+    ),
+  },
+  {
+    value: 'gain_followers',
+    title: 'Informar o educar',
+    description: 'Contenido de valor para tu audiencia.',
+    icon: (
+      <img src="/assets/icons/hat-purple.svg" alt="" />
+    ),
+  },
+  {
+    value: 'increase_engagement',
+    title: 'Conectar',
+    description: 'Humanizar la marca y generar empatía.',
+    icon: (
+      <img src="/assets/icons/heart-pink.svg" alt="" />
+    ),
+  },
+]
+
+function derivePeriod(start: string, end: string): string {
+  if (!start || !end) return 'week'
+  const diff = Math.round((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
+  if (diff <= 1) return 'day'
+  if (diff <= 8) return 'week'
+  return 'month'
+}
 
 export default function NewPlanPage() {
   const router = useRouter()
@@ -31,11 +64,32 @@ export default function NewPlanPage() {
   const [chosenVariants, setChosenVariants] = useState<Record<number, AIVariant>>({})
   const [saved, setSaved] = useState(false)
 
-  const [objective, setObjective] = useState(OBJECTIVES[0])
-  const [product, setProduct] = useState(PRODUCTS_MOCK[1])
-  const [audience, setAudience] = useState("Mamás del barrio")
-  const [tone, setTone] = useState(TONES[2])
-  const [frequency, setFrequency] = useState(PERIODS[1])
+  const [productOptions, setProductOptions] = useState<{ value: string; label: string }[]>([])
+  const [audienceOptions, setAudienceOptions] = useState<{ value: string; label: string }[]>([])
+
+  const [product, setProduct] = useState('')
+  const [audience, setAudience] = useState('')
+  const [tone, setTone] = useState('cercano')
+  const [objective, setObjective] = useState(GOAL_OPTIONS[0].value)
+  const [period, setPeriod] = useState('')
+
+  useEffect(() => {
+    fetch('/api/products', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data: { id: string; name: string }[]) => {
+        const options = data.map((p) => ({ value: p.id, label: p.name }))
+        setProductOptions(options)
+        if (options.length > 0) setProduct(options[0].value)
+      })
+
+    fetch('/api/audiences', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data: { id: string; name: string }[]) => {
+        const options = data.map((a) => ({ value: a.id, label: a.name }))
+        setAudienceOptions(options)
+        if (options.length > 0) setAudience(options[0].value)
+      })
+  }, [])
 
   async function handleGenerate() {
     setLoading(true)
@@ -44,7 +98,8 @@ export default function NewPlanPage() {
     const res = await fetch('/api/generate/plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ objective, tone, product, audience, frequency }),
+      credentials: 'include',
+      body: JSON.stringify({ objective, tone, product, audience, period }),
     })
     const data: GeneratePlanResponse = await res.json()
     setResult(data)
@@ -63,6 +118,7 @@ export default function NewPlanPage() {
     await fetch('/api/plans', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ planId: result.planId, posts }),
     })
     setSaved(true)
@@ -70,98 +126,94 @@ export default function NewPlanPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-1">Crear plan de contenido</h1>
-      <p className="text-gray-500 mb-6">Organizá tus redes por un período completo.</p>
+    <div className="flex flex-col gap-2">
+      <h1 className="text-2xl font-bold text-neutral-950">Plan de contenido</h1>
+      <p className="text-sm text-neutral-500 mb-4">Revisa y edita cada detalle de tu plan antes de comenzar a trabajar</p>
 
       {!result && (
-        <div className="bg-white border rounded-lg p-6 flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Objetivo</label>
+        <div className="bg-surface-white border border-border-subtle rounded-2xl p-6 flex flex-col gap-6">
+
+          {/* Section header */}
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-primary-ghost">
+              <img src="/assets/icons/graph-purple.svg" />
+            </span>
+            <span className="font-bold text-base text-neutral-950">Configuración del Plan</span>
+          </div>
+
+          {/* Producto */}
+          <Select
+            id="select-product"
+            label="¿Qué producto o servicio querés destacar?"
+            options={productOptions}
+            value={product}
+            onChange={setProduct}
+            placeholder="Selecciona tus productos y/o servicios"
+          />
+
+          {/* Audiencia */}
+          <Select
+            id="select-audience"
+            label="¿A quién le querés hablar?"
+            options={audienceOptions}
+            value={audience}
+            onChange={setAudience}
+            placeholder="Selecciona tus audiencias"
+          />
+
+          {/* Fechas + Tono */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              {OBJECTIVES.map((o) => (
-                <label key={o} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="objective"
-                    checked={objective === o}
-                    onChange={() => setObjective(o)}
-                  />
-                  <span className="text-sm">{o}</span>
-                </label>
-              ))}
+              <Select
+                id="select-tone"
+                label="¿Cuánto querés que dure la estrategia?"
+                options={PERIOD_OPTIONS}
+                value={period}
+                onChange={setPeriod}
+                placeholder="Seleccioná la duración"
+              />
             </div>
+
+            <Select
+              id="select-tone"
+              label="Personalidad del mensaje"
+              options={TONE_OPTIONS}
+              value={tone}
+              onChange={setTone}
+              placeholder="Selecciona un tono y voz"
+            />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Producto</label>
-            <select 
-              className="w-full border rounded px-3 py-2 text-sm"
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-            >
-              {PRODUCTS_MOCK.map((p) => (
-                <option key={p} value={p}>{p}</option>
+          {/* Objetivo */}
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-medium text-neutral-700">¿Qué querés lograr con este plan de contenido?</label>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="sr-only">Objetivo del plan</legend>
+              {GOAL_OPTIONS.map((opt) => (
+                <GoalOption
+                  key={opt.value}
+                  name="objective"
+                  value={opt.value}
+                  title={opt.title}
+                  description={opt.description}
+                  icon={opt.icon}
+                  checked={objective === opt.value}
+                  onChange={setObjective}
+                />
               ))}
-              <option>+ Agregar nueva</option>
-            </select>
+            </fieldset>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Audiencia</label>
-            <select 
-              className="w-full border rounded px-3 py-2 text-sm"
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
-            >
-              {AUDIENCE_MOCK.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-              <option>+ Agregar nueva</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Tono de comunicación</label>
-            <div className="flex gap-2 flex-wrap">
-              {TONES.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTone(t)}
-                  className={`px-4 py-1.5 rounded-full text-sm border ${
-                    tone === t ? 'bg-black text-white border-black' : 'border-gray-300'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Período</label>
-            <div className="flex gap-2 flex-wrap">
-              {PERIODS.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setFrequency(t)}
-                  className={`px-4 py-1.5 rounded-full text-sm border ${
-                    frequency === t ? 'bg-black text-white border-black' : 'border-gray-300'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button
+          <Button
+            variant="primary"
             onClick={handleGenerate}
             disabled={loading}
-            className="bg-black text-white py-2 rounded font-medium text-sm disabled:opacity-50"
           >
-            {loading ? 'Generando tu plan...' : 'Generar plan'}
-          </button>
+            {loading ? 'Generando tu plan...' : `
+              ✦ 
+              Generar plan
+            `}
+          </Button>
         </div>
       )}
 
@@ -231,19 +283,19 @@ export default function NewPlanPage() {
           </div>
 
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="primary"
               onClick={handleSave}
               disabled={saved}
-              className="bg-black text-white px-6 py-2 rounded font-medium text-sm disabled:opacity-50"
             >
               {saved ? 'Plan guardado ✓' : 'Guardar plan'}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setResult(null)}
-              className="border px-6 py-2 rounded text-sm"
             >
               Volver a configurar
-            </button>
+            </Button>
           </div>
         </div>
       )}
