@@ -87,8 +87,8 @@ export function StepBusiness({ data, errors, onChange, onNext }: StepBusinessPro
 
       <Textarea
         id="business-description"
-        label="¿Qué hace especial a tu negocio?"
-        placeholder="Ej: Hacemos pan de masa madre con receta familiar, sin conservantes"
+        label="Descripción breve"
+        placeholder="Contanós que hace que tu negocio sea especial..."
         rows={3}
         value={data.description}
         onChange={(e) => onChange({ ...data, description: e.target.value })}
@@ -97,7 +97,7 @@ export function StepBusiness({ data, errors, onChange, onNext }: StepBusinessPro
       {errors.description && <p className="text-red-500 text-xs -mt-3">{errors.description}</p>}
 
       <BatchSelect
-        label="Redes sociales donde tenés presencia"
+        label="¿En qué redes estás?"
         options={SOCIAL_NETS}
         value={data.socialNetworks}
         onChange={(values) => onChange({ ...data, socialNetworks: values })}

@@ -105,7 +105,7 @@ export function StepProducts({
 
         <Textarea
           id="product-description"
-          label="¿Qué problema les resolvés?"
+          label="¿De qué trata?"
           placeholder="Ej: Ayudo a mis alumnos a tocar sus canciones favoritas"
           rows={3}
           value={form.description}
