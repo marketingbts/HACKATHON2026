@@ -428,10 +428,11 @@ export default function PlansPage() {
           </section>
 
           {/* Feedback / Ajuste de plan */}
-          <section className="flex flex-col gap-3">
+          <section className="flex flex-col gap-3 opacity-50 pointer-events-none select-none">
             <div>
               <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
                 <span>✦</span> ¿Querés ajustar el plan?
+                <span className="text-xs font-semibold text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full tracking-wide uppercase">Próximamente</span>
               </h2>
               <p className="text-sm text-neutral-500">Decile a Marki qué cambiar y regenerará el plan respetando lo que ya funciona.</p>
             </div>
@@ -443,8 +444,8 @@ export default function PlansPage() {
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
               />
-              <Button variant="outline" onClick={handleRefine} disabled={generatePlan.isPending || !feedback.trim()}>
-                {generatePlan.isPending ? 'Ajustando tu plan...' : '✦ Ajustar plan con este feedback'}
+              <Button variant="outline" onClick={handleRefine} disabled>
+                ✦ Ajustar plan con este feedback
               </Button>
             </div>
           </section>

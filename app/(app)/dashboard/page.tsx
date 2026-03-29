@@ -70,7 +70,7 @@ export default function DashboardPage() {
           brandName={brandName}
           brandLogoUrl={businessData?.logoUrl ?? undefined}
           socialNetworks={(businessData?.socialNetworks as any) ?? ['instagram', 'facebook']}
-          onStartNow={() => router.push('/generate')}
+          onStartNow={() => router.push('/plans')}
           onContinue={() => router.push('/plans')}
         />
       </section>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
               title="Todavía no tenés contenido"
               description="Tu calendario está esperando nuevas ideas. Dejá que la IA trabaje por vos y generá tu primera publicación hoy mismo."
               ctaLabel="Generar mi primer contenido"
-              onCta={() => router.push('/generate')}
+              onCta={() => router.push('/plans')}
             />
           </div>
         ) : (
