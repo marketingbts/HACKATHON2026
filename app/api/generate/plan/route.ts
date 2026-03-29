@@ -23,6 +23,13 @@ type AIPlanResponse = {
     copies: Array<{ text: string; visual_description: string }>
   }>
   recommended_actions: string[]
+  calendar: Array<{
+    date: string
+    action: string
+    type: string
+    goal: string
+    suggested_time: string
+  }>
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -65,7 +72,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const body = await req.json()
-  const { objective, tone, period, audienceIds, productIds, detail } = body
+  const { objective, tone, period, audienceIds, productIds, detail, feedback, previousPlan } = body
 
   if (!objective || !tone || !period) {
     return NextResponse.json({ error: 'Faltan campos obligatorios: objective, tone, period' }, { status: 400 })
@@ -106,13 +113,51 @@ export async function POST(req: Request) {
   const selectedAudiences = (selectedAudienceRows ?? []).map(mapAudience)
   const selectedProducts  = (selectedProductRows ?? []).map(mapProduct)
 
-  // 3. Fechas del periodo
+  // 3. Llamar a la IA
+  const promptBody = buildPlanPrompt({
+    business, audiences: allAudiences, products: allProducts,
+    objective, selectedAudiences, selectedProducts, tone, period, detail,
+    ...(feedback && { feedback }),
+    ...(previousPlan && { previousPlan }),
+  })
+
+  // Si viene feedback, es un refinamiento: no crear plan en DB, solo generar y devolver
+  if (feedback) {
+    let aiRaw: string
+    try {
+      aiRaw = await callAIWithRetry(promptBody)
+    } catch {
+      return NextResponse.json(
+        { error: 'No pudimos generar el contenido. Verificá tu conexión e intentá de nuevo.' },
+        { status: 503 }
+      )
+    }
+
+    let parsed: AIPlanResponse
+    try {
+      parsed = JSON.parse(aiRaw)
+    } catch {
+      return NextResponse.json(
+        { error: 'No pudimos generar el contenido. Verificá tu conexión e intentá de nuevo.' },
+        { status: 503 }
+      )
+    }
+
+    // Devolver en el mismo formato que la página espera (igual al raw AI response con date→day)
+    return NextResponse.json({
+      strategy_summary: parsed.strategy_summary,
+      recommended_actions: parsed.recommended_actions ?? [],
+      posts: (parsed.posts ?? []).map((p) => ({ ...p, day: p.date })),
+      calendar: (parsed.calendar ?? []).map((e) => ({ ...e, day: e.date })),
+    })
+  }
+
+  // 4. Crear plan en DB (solo en generación inicial)
   const periodStart = new Date().toISOString().split('T')[0]
   const endDate = new Date()
   endDate.setDate(endDate.getDate() + PERIOD_DAYS[period])
   const periodEnd = endDate.toISOString().split('T')[0]
 
-  // 4. Crear plan en DB
   const { data: planRow, error: planError } = await supabase
     .from('content_plans')
     .insert({ business_id: businessRow.id, objective, tone, period_start: periodStart, period_end: periodEnd, status: 'active' })
@@ -142,11 +187,6 @@ export async function POST(req: Request) {
   await Promise.all(junctionInserts)
 
   // 6. Llamar a la IA
-  const promptBody = buildPlanPrompt({
-    business, audiences: allAudiences, products: allProducts,
-    objective, selectedAudiences, selectedProducts, tone, period, detail,
-  })
-
   let aiRaw: string
   try {
     aiRaw = await callAIWithRetry(promptBody)

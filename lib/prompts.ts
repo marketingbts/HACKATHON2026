@@ -211,6 +211,17 @@ Debés usar esta información para construir un calendario de publicaciones real
 - No repetir todas las publicaciones el mismo día
 - No ignorar el contexto temporal
 
+---
+
+## REFINAMIENTO DE PLAN
+
+Si el input incluye user_feedback y previous_plan, estás **refinando** un plan existente.
+- Respetá todo lo que el usuario NO mencionó cambiar
+- Ajustá específicamente lo que se pidió en user_feedback
+- Mantené las fechas y la distribución temporal donde sea posible
+- Si el feedback pide un cambio de tono, aplicalo a todos los copies
+- Si el feedback pide más/menos de un formato (ej: "más reels"), redistribuí los tipos de publicación
+
 Recordá: SOLO JSON válido.
   `.trim()
 }
@@ -222,7 +233,7 @@ function buildAssistantContext(params: BuildPlanPromptParams): string {
   const current_time = now.toLocaleTimeString('es-AR', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: false })
   const day_of_week = now.toLocaleDateString('es-AR', { timeZone: timezone, weekday: 'long' })
 
-  return JSON.stringify({
+  const context: Record<string, unknown> = {
     time_context: {
       current_date,
       current_time,
@@ -236,7 +247,16 @@ function buildAssistantContext(params: BuildPlanPromptParams): string {
       params.tone,
       params.period,
     ),
-  })
+  }
+
+  if (params.feedback) {
+    context.user_feedback = params.feedback
+  }
+  if (params.previousPlan) {
+    context.previous_plan = params.previousPlan
+  }
+
+  return JSON.stringify(context)
 }
 
 function buildQuickSystemContent(): string {

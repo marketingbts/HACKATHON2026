@@ -94,6 +94,8 @@ export default function NewPlanPage() {
   const [chosenCopies, setChosenCopies] = useState<Record<number, number>>({})
   const [saved, setSaved] = useState(false)
   const [calendarView, setCalendarView] = useState<'list' | 'grid'>('list')
+  const [feedback, setFeedback] = useState('')
+  const [refining, setRefining] = useState(false)
 
   const [productOptions, setProductOptions] = useState<{ value: string; label: string }[]>([])
   const [audienceOptions, setAudienceOptions] = useState<{ value: string; label: string }[]>([])
@@ -135,6 +137,22 @@ export default function NewPlanPage() {
     const data: PlanResult = await res.json()
     setResult(data)
     setLoading(false)
+  }
+
+  async function handleRefine() {
+    if (!feedback.trim() || !result) return
+    setRefining(true)
+    setChosenCopies({})
+    const res = await fetch('/api/generate/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ objective, tone, product, audience, period, feedback, previousPlan: result }),
+    })
+    const data: PlanResult = await res.json()
+    setResult(data)
+    setFeedback('')
+    setRefining(false)
   }
 
   async function handleSave() {
@@ -440,6 +458,28 @@ export default function NewPlanPage() {
                 </table>
               </div>
             )}
+          </section>
+
+          {/* Feedback / Ajuste de plan */}
+          <section className="flex flex-col gap-3">
+            <div>
+              <h2 className="font-bold text-xl text-brand-900 flex items-center gap-2">
+                <span>✦</span> ¿Querés ajustar el plan?
+              </h2>
+              <p className="text-sm text-neutral-500">Decile a Marki qué cambiar y regenerará el plan respetando lo que ya funciona.</p>
+            </div>
+            <div className="bg-surface-white border border-border-subtle rounded-xl p-4 flex flex-col gap-3">
+              <textarea
+                className="w-full border border-border-subtle rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand/30"
+                rows={3}
+                placeholder='Ej: "Quiero más reels y un tono más divertido" o "Cambiá el enfoque a promoción del fin de semana"'
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              />
+              <Button variant="outline" onClick={handleRefine} disabled={refining || !feedback.trim()}>
+                {refining ? 'Ajustando tu plan...' : '✦ Ajustar plan con este feedback'}
+              </Button>
+            </div>
           </section>
 
           {/* Save */}
